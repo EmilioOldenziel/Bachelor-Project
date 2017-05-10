@@ -27,10 +27,11 @@ for i=1:length(labels)
 end
 
 %lvq validate with global matrices
-[gmlvq_mean,roc_val,lcurves_mean,lcurves_std,param_set] = run_validation(coefficients,problem1labels,50, 1, 10);
+[gmlvq_mean,roc_val,lcurves_mean,lcurves_std,param_set] = run_validation(coefficients,problem1labels,50, 10, 10);
 
+%save the figures in the results folder
 dataset_name = strrep(dataset_filename,'.csv','');
-dir_name = strcat(dataset_name, num2str(number_of_coefficients), 'coef', 'problem1original');
+dir_name = strcat(dataset_name, num2str(number_of_coefficients), 'coef', 'problem1global');
 dir_path = strcat('../../../results/', dir_name);
 mkdir('../../../results/', dir_name);
 save_figures(dir_path);

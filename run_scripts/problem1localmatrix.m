@@ -27,3 +27,10 @@ end
 
 %lvq validation with local matrices
 [gmlvq_mean,roc_val,lcurves_mean,lcurves_std,param_set] = run_validation(coefficients,problem1labels,50, 10,10);
+
+%save the figures in the results folder
+dataset_name = strrep(dataset_filename,'.csv','');
+dir_name = strcat(dataset_name, num2str(number_of_coefficients), 'coef', 'problem1local');
+dir_path = strcat('../../../results/', dir_name);
+mkdir('../../../results/', dir_name);
+save_figures(dir_path);
