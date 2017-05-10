@@ -1,0 +1,32 @@
+addpath('../../../datasets/sugar/data')
+addpath('../../cheb')
+addpath('../../no-nonsense-gmlvq-v2-3/')
+% read the data from the files
+[spectra, labels, wavelengths] = loadDataset('sugar_neoVNIR1600.csv');
+[spectra_val, labels_val, wavelengths_val] = loadDataset('sugar_neoVNIR1600_val.csv');
+
+% parse them to chebysev polynomials
+number_of_coefficients = 20;
+[coefficients, transformationMatrix, backtransformationMatrix] = chebyshev(spectra, number_of_coefficients);
+
+%reduce from 9 to 3 classes #problem 1
+problem1labels = labels
+for i=1:length(labels)
+    if problem1labels(i) < 5
+        problem1labels(i) = 1;
+    elseif problem1labels(i) > 6
+        problem1labels(i) = 3;
+    else
+        problem1labels(i) = 2;
+    end
+end
+
+problem4labels = labels;
+for i=1:length(labels)
+   if problem4labels(i) < 7
+       problem4labels(i) = 0;
+   end
+end
+
+%lvq that shit
+[gmlvq_mean,roc_val,lcurves_mean,lcurves_std,param_set] = run_validation(coefficients,problem1labels,50, 10,10);
