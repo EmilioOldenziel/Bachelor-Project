@@ -5,7 +5,7 @@
 function [gmlvq_mean, roc_validation, lcurves_mean,...
           lcurves_sdt, param_set] = ...
   run_validation(fvec,lbl,totalsteps,nruns,prctg,plbl) 
-            
+
 % general algorithm settings and parameters of the Papari procedure
             % general algorithm settings and parameters of the Papari procedure
 [showplots,doztr,mode,rndinit, etam, etap, mu, decfac, incfac, ncop] =...
@@ -40,7 +40,7 @@ close all;
 % set defaults if necessary
 
 if (nargin<6||isempty(plbl));       % one prototype per class?
-    plbl=[1:length(unique(lbl))];  
+    plbl=(1:length(unique(lbl)));  
     display('default: one prototype per class'); 
 end;
 display('prototype configuration'); plbl
@@ -73,7 +73,7 @@ stetra=scftra; steval=scftra; sauctra=scftra; saucval=scftra;
 scwtra= zeros(totalsteps,nclasses); scwval=scwtra; 
 confmat=zeros(nclasses,nclasses); 
 
-lambda=zeros(nruns,nclasses,ndim,ndim);    % local relevance matrices
+lambdas=zeros(nruns,nclasses,ndim,ndim);    % local relevance matrices
 protos=zeros(nruns,length(plbl),ndim);     % prototypes
 
 
@@ -125,7 +125,7 @@ for krun=1:nruns;  % loop for validation runs
                                       
    protos(krun,:,:)=w;
    for i=1:nclasses;
-       lambda(krun,i,:,:) = omegas(i)'*omegas(i);
+       lambdas(krun,i,:,:) = omegas(i)'*omegas(i);
    end
    % get final classification labels and score
    [~,crout,~,score]    = compute_costs(fvecout,lblout,w,plbl,omega,mu); 
@@ -188,8 +188,8 @@ end;
  % errors, auc and class-wise errors and corresponding standard deviations
    protos_mean = wm; 
    protos_std  = sqrt(wm2 - wm.^2);
-   lambda_mean = squeeze(mean(lambda,1)); 
-   lambda_std  = sqrt(squeeze(mean(lambda.^2,1))-lambda_mean.^2); 
+   lambda_mean = squeeze(mean(lambdas,1)); 
+   lambda_std  = sqrt(squeeze(mean(lambdas.^2,1))-lambda_mean.^2); 
    scftra= sqrt(scftra-mcftra.^2);   scfval= sqrt(scfval-mcfval.^2);
    stetra= sqrt(stetra-mtetra.^2);   steval= sqrt(steval-mteval.^2); 
    sauctra=sqrt(sauctra-mauctra.^2); saucval=sqrt(saucval-maucval.^2);
@@ -248,13 +248,13 @@ if(showplots==1);   % display results
    legend('training','test','Location','Best'); 
    xlabel('gradient steps');
    errorbar(onlyat,mtetra(onlyat),stetra(onlyat)/sqrt(nruns),...
-           'co','MarkerSize',1); 
+    ndim       'co','MarkerSize',1); 
    errorbar(onlyatval,mteval(onlyatval),steval(onlyatval)/sqrt(nruns),...
            'go','MarkerSize',1);  
    hold off;
   
    
-  subplot(3,2,2);                 % AUC(ROC) for training and validation 
+   subplot(3,2,2);                 % AUC(ROC) for training and validation 
    plot(1:totalsteps,mauctra,':.',1:totalsteps,maucval,':.',...
                                                  'MarkerSize',msize); 
    axis([1 totalsteps min(0.7,min(maucval)) 1.05]); % axis 'auto y';
