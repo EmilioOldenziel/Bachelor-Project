@@ -42,11 +42,15 @@ number_of_prototypes = length(plbl);       % total number of prototypes
   [prototypes_initial,omega_intitial] =  set_initial(fvec,lbl,plbl,mode,rndinit);
   prototypes=prototypes_initial;  omega=omega_intitial;   % initial values
 
+  for i=1:number_of_prototypes
+    omega_intitial{i}
+  end
+
 %copies of prototypes are stored in prototypes_original
 prototypes_original = zeros(n_original,size(prototypes,1),size(prototypes,2));
 
 if(mode==4)
-  omega_original = zeros(n_original,size(omega,1) ,size(omega,2),size(omega,3));
+  omega_original = cell(n_original,size(omega,2));
 else
 %  copies of omegas are stored in omega_original
   omega_original   = zeros(n_original,size(omega,1) , size(omega,2));
@@ -63,7 +67,7 @@ end
   % performance
   for inistep=1: n_original;
       [prototypes,omega]= do_batchstep(fvec,lbl,prototypes,plbl,omega,prototype_update_step_size,m_update_step_size,mu,mode); 
-      prototypes_original(inistep,:,:)= prototypes; 
+      prototypes_original(inistep,:,:)= prototypes;
       omega_original  (inistep,:,:)= omega;
       
       omega=omega/sqrt(sum(sum(omega.*omega))); 

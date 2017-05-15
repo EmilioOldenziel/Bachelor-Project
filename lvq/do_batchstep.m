@@ -11,7 +11,7 @@ function [prot,omat]= do_batchstep (fvec,lbl,proti,plbl,...
 % lbl              training labels  lbl(1:nfv);
 % proti            prototypes before the step
 % plbl             prototype labels
-% omegai           global matrix before the step
+% omegai           global matrix or local_matrices before the step
 % etap,etam        prototype/matrix learning rate
 % mu               mu>0 controls penalty for singular relevance matrix
 % mode             0 for full, 1 for matrix with nullspace correction
@@ -27,7 +27,19 @@ nfv = length(lbl);      % number of feature vectors (training samples)
 cls = unique(lbl);      % set of class labels
 np = size(proti,1);     % number of prototypes
 
-omat = omegai;  lambda = omat'*omat;   % omega and lambda before step
+
+omat = omegai; %omega before step
+
+
+if(mode ==4)
+  lambda = cell(1,np);
+  for i=1:np
+    lambda{i} = omat{i}'*omat{i};
+  end
+else
+    lambda = omat'*omat; % lambda before step
+end
+
 % omat=sqrtm(lambda);
 prot=proti;                            % prototypes before step
 

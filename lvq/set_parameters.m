@@ -11,12 +11,13 @@ ndim = size(fvec,2);
 
 if (mode ~= 4)
   % GMLVQ parameters, explained below
-  showplots  = 1;  
-  doztr      = 1; 
   mode       = 1; 
-  rndinit    = 0; 
-  mu         = 0;
 end
+
+showplots  = 1;  
+doztr      = 1; 
+rndinit    = 0; 
+mu         = 0;
 
 % showplots (0 or 1): plot learning curves etc? recommended: 1
 % doztr (0 or 1): perform z-score transformation based on training set
@@ -36,13 +37,13 @@ end
  
   
 % parameters of stepsize adaptation 
-if (mode<2); % full matrix updates with (0) or w/o (1) null space correction
+if (mode<2 || mode==4); % full matrix updates with (0) or w/o (1) null space correction
   etam   = 2; % suggestion: 2
   etap   = 1; % suggestion: 1
   if (mode==0); 
       display('matrix relevances without null-space correction'); 
   end;
-  if (mode==1);
+  if (mode==1 || mode==4);
       display('matrix relevances with null-space correction'); 
   end;
 

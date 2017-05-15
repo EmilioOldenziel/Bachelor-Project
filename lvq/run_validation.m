@@ -7,7 +7,7 @@ function [gmlvq_mean, roc_validation, lcurves_mean,...
   run_validation(fvec,lbl,totalsteps,nruns,prctg,plbl) 
 
 %mode 4 is LGMLVQ
-mode = 1;
+mode = 4;
 % general algorithm settings and parameters of the Papari procedure
             % general algorithm settings and parameters of the Papari procedure
 [showplots,doztr,mode,rndinit, etam, etap, mu, decfac, incfac, ncop] =...
