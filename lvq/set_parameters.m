@@ -1,6 +1,6 @@
 
 function [showplots,doztr,mode,rndinit,etam,etap,mu,decfac,incfac,ncop] =...
-                                        set_parameters(fvec)
+                                        set_parameters(fvec, mode)
   
 % set general parameters 
 % set initial step sizes and control parameters of
@@ -9,12 +9,14 @@ function [showplots,doztr,mode,rndinit,etam,etap,mu,decfac,incfac,ncop] =...
 nfv=size(fvec,1);
 ndim = size(fvec,2);
 
-% GMLVQ parameters, explained below
-showplots  = 1;  
-doztr      = 1; 
-mode       = 1; 
-rndinit    = 0; 
-mu         = 0;
+if (mode ~= 4)
+  % GMLVQ parameters, explained below
+  showplots  = 1;  
+  doztr      = 1; 
+  mode       = 1; 
+  rndinit    = 0; 
+  mu         = 0;
+end
 
 % showplots (0 or 1): plot learning curves etc? recommended: 1
 % doztr (0 or 1): perform z-score transformation based on training set

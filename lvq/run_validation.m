@@ -6,10 +6,12 @@ function [gmlvq_mean, roc_validation, lcurves_mean,...
           lcurves_sdt, param_set] = ...
   run_validation(fvec,lbl,totalsteps,nruns,prctg,plbl) 
 
+%mode 4 is LGMLVQ
+mode = 1;
 % general algorithm settings and parameters of the Papari procedure
             % general algorithm settings and parameters of the Papari procedure
 [showplots,doztr,mode,rndinit, etam, etap, mu, decfac, incfac, ncop] =...
-                                        set_parameters(fvec); 
+                                        set_parameters(fvec, mode); 
 % input and parameters
 % fvec      : set of all feature vectors 
 % lbl       : class labels of data 
@@ -119,14 +121,19 @@ for krun=1:nruns;  % loop for validation runs
   end;
   
   % perform one run and get learning curve variables
-   [w,omegas,cftra,tetra,cwtra,auctra,cfval,teval,cwval,aucval]= ...
+   [w,omega,cftra,tetra,cwtra,auctra,cfval,teval,cwval,aucval]= ...
     do_lcurve(fvectrain,lbltrain,fvecout,lblout,...
-                                          plbl,totalsteps);                                      
-                                      
+                                          plbl,totalsteps, mode);
+   
    protos(krun,:,:)=w;
-   for i=1:nclasses;
-       lambdas(krun,i,:,:) = omegas(i)'*omegas(i);
+   if (mode==4);
+       for i=1:nclasses;
+           lambda(krun,i,:,:) = omegas(i)'*omegas(i);
+       end
+   else
+       lambda(krun,:,:) = omega'*omega;
    end
+
    % get final classification labels and score
    [~,crout,~,score]    = compute_costs(fvecout,lblout,w,plbl,omega,mu); 
    % compute ROC
@@ -188,8 +195,8 @@ end;
  % errors, auc and class-wise errors and corresponding standard deviations
    protos_mean = wm; 
    protos_std  = sqrt(wm2 - wm.^2);
-   lambda_mean = squeeze(mean(lambdas,1)); 
-   lambda_std  = sqrt(squeeze(mean(lambdas.^2,1))-lambda_mean.^2); 
+   lambda_mean = squeeze(mean(lambda,1)); 
+   lambda_std  = sqrt(squeeze(mean(lambda.^2,1))-lambda_mean.^2); 
    scftra= sqrt(scftra-mcftra.^2);   scfval= sqrt(scfval-mcfval.^2);
    stetra= sqrt(stetra-mtetra.^2);   steval= sqrt(steval-mteval.^2); 
    sauctra=sqrt(sauctra-mauctra.^2); saucval=sqrt(saucval-maucval.^2);
@@ -248,7 +255,7 @@ if(showplots==1);   % display results
    legend('training','test','Location','Best'); 
    xlabel('gradient steps');
    errorbar(onlyat,mtetra(onlyat),stetra(onlyat)/sqrt(nruns),...
-    ndim       'co','MarkerSize',1); 
+           'co','MarkerSize',1); 
    errorbar(onlyatval,mteval(onlyatval),steval(onlyatval)/sqrt(nruns),...
            'go','MarkerSize',1);  
    hold off;

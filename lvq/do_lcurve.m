@@ -7,8 +7,7 @@
 % with respect to training set and validation set
 
 function [w,omega,cftra,tetra,cwtra,auctra,cfval,teval,cwval,aucval]= ...
-   do_lcurve(fvec,lbl,fvecval,lblval,plbl,totalsteps);    
-
+   do_lcurve(fvec,lbl,fvecval,lblval,plbl,totalsteps, mode)
 % input arguments    
 % fvec, lbl              training data, feature vectors and labels
 % fvecval, lblval        validation data, feature vectors and labels
@@ -23,10 +22,9 @@ function [w,omega,cftra,tetra,cwtra,auctra,cfval,teval,cwval,aucval]= ...
   % 1 for randomized initialization of relevance matrix
 % totalsteps: number of batch gradient steps to be performed
 
-    
 % general algorithm settings and parameters of the Papari procedure
 [~,~,mode,rndinit, m_update_step_size, prototype_update_step_size, mu, decfac, incfac, n_original] =...
-                                        set_parameters(fvec);
+                                        set_parameters(fvec, mode);
 % m_update_step_size:             step size of matrix updates
 % prototype_update_step_size:     step size of prototype updates
 % mu   :                          control parameter of penalty term
@@ -42,11 +40,17 @@ number_of_prototypes = length(plbl);       % total number of prototypes
           
 % initialize prototypes and omega
   [prototypes_initial,omega_intitial] =  set_initial(fvec,lbl,plbl,mode,rndinit);
-  prototypes=prototypes_initial;  omega =omega_original;   % initial values   
-% copies of prototypes and omegas stored in prototypes_original and omega_original
-  prototypes_original = zeros(n_original,size(prot,1),size(prot,2));
-  omega_original   = zeros(n_original,size(omega,1) , size(omega,2) );
+  prototypes=prototypes_initial;  omega=omega_intitial;   % initial values
 
+%copies of prototypes are stored in prototypes_original
+prototypes_original = zeros(n_original,size(prototypes,1),size(prototypes,2));
+
+if(mode==4)
+  omega_original = zeros(n_original,size(omega,1) ,size(omega,2),size(omega,3));
+else
+%  copies of omegas are stored in omega_original
+  omega_original   = zeros(n_original,size(omega,1) , size(omega,2));
+end
   
    % learning curves, perfomance w.r.t. training and validation set
  cftra =  NaN(totalsteps,1); cfval = cftra; % cost fucnction and equivalent
@@ -58,15 +62,15 @@ number_of_prototypes = length(plbl);       % total number of prototypes
   % perform the first n_original steps of gradient descent and compute
   % performance
   for inistep=1: n_original;
-      [prot,omega]= do_batchstep(fvec,lbl,prot,plbl,omega,prototype_update_step_size,m_update_step_size,mu,mode); 
-      prototypes_original(inistep,:,:)= prot; 
+      [prototypes,omega]= do_batchstep(fvec,lbl,prototypes,plbl,omega,prototype_update_step_size,m_update_step_size,mu,mode); 
+      prototypes_original(inistep,:,:)= prototypes; 
       omega_original  (inistep,:,:)= omega;
       
       omega=omega/sqrt(sum(sum(omega.*omega))); 
       % compute costs without penalty term here
-      [costf,~,marg,score]    = compute_costs(fvec,lbl,prot,plbl,omega,0);
+      [costf,~,marg,score]    = compute_costs(fvec,lbl,prototypes,plbl,omega,0);
       [costval,~,margval,scoreval]= ...
-                         compute_costs(fvecval,lblval,prot,plbl,omega,0); 
+                         compute_costs(fvecval,lblval,prototypes,plbl,omega,0); 
       cftra(inistep)= costf; cfval(inistep)= costval;
       
       tetra(inistep)= sum(marg>0)/nfv; 
@@ -86,7 +90,7 @@ number_of_prototypes = length(plbl);       % total number of prototypes
   
   end;
  
-   [~,~,~,score]    = compute_costs(fvec,lbl,prot,plbl,omega,mu); 
+   [~,~,~,score]    = compute_costs(fvec,lbl,prototypes,plbl,omega,mu); 
   
 % initial steps of Papari procedure complete, now remaining steps:
  
@@ -102,16 +106,16 @@ for jstep=(n_original+1):totalsteps;
  
  % compute cost functions for mean prototypes, mean matrix and both 
 [costmp,~,~,score ] = compute_costs(fvec,lbl,protmean,plbl,omega, 0);
-[costmm,~,~,score ] = compute_costs(fvec,lbl,prot,    plbl,omega_mean,mu); 
+[costmm,~,~,score ] = compute_costs(fvec,lbl,prototypes,    plbl,omega_mean,mu); 
 % [costm, ~,~,score ] = compute_costs(fvec,lbl,protmean,plbl,omega_mean,mu); 
 
 % remember old positions for Papari procedure
 ombefore=omega; 
-protbefore=prot;
+protbefore=prototypes;
  
  % perform next step and compute costs etc.
-[prot,omega]= do_batchstep (fvec,lbl,prot,plbl,omega,prototype_update_step_size,m_update_step_size,mu,mode);  
-[costf,~,~,score] = compute_costs(fvec,lbl,prot,plbl,omega,mu); 
+[prototypes,omega]= do_batchstep (fvec,lbl,prototypes,plbl,omega,prototype_update_step_size,m_update_step_size,mu,mode);  
+[costf,~,~,score] = compute_costs(fvec,lbl,prototypes,plbl,omega,mu); 
 
 % by default, step sizes are increased in every step
  m_update_step_size=m_update_step_size*incfac; % (small) increase of step sizes
@@ -119,7 +123,7 @@ protbefore=prot;
 
 % costfunction values to compare with for Papari procedure
 % evaluated w.r.t. changing only matrix or prototype
-[costfp,~,~,score] = compute_costs(fvec,lbl,prot,plbl,ombefore,0);
+[costfp,~,~,score] = compute_costs(fvec,lbl,prototypes,plbl,ombefore,0);
 [costfm,~,~,score] = compute_costs(fvec,lbl,protbefore,plbl,omega,mu); 
    
 % heuristic extension of Papari procedure
@@ -127,7 +131,7 @@ protbefore=prot;
  if (costmp <= costfp ); % decrease prototype step size and jump
                          % to mean prototypes
      prototype_update_step_size = prototype_update_step_size/decfac;
-     prot = protmean;
+     prototypes = protmean;
  end; 
  if (costmm <= costfm ); % decrease matrix step size and jump
                          % to mean matrix
@@ -140,13 +144,13 @@ protbefore=prot;
    prototypes_original(iicop,:,:)=prototypes_original(iicop+1,:,:);
    omega_original(iicop,:,:)  =omega_original  (iicop+1,:,:);
  end;
- prototypes_original(n_original,:,:)=prot;  omega_original(n_original,:,:)=omega;
+ prototypes_original(n_original,:,:)=prototypes;  omega_original(n_original,:,:)=omega;
  
  % determine training and test set performances 
  % and calculate cost function without penalty terms
-[costf,~,marg,score] = compute_costs(fvec,lbl,prot,plbl,omega,0); 
+[costf,~,marg,score] = compute_costs(fvec,lbl,prototypes,plbl,omega,0); 
 [costval,~,margval,scoreval]= ...
-                     compute_costs(fvecval,lblval,prot,plbl,omega,0);
+                     compute_costs(fvecval,lblval,prototypes,plbl,omega,0);
 
        
  cftra(jstep)= costf; cfval(jstep)= costval;
@@ -166,6 +170,6 @@ protbefore=prot;
 end; % end of totalsteps gradient steps (jrun)
 
  % output final lvq configuration after totalsteps steps: 
- w  =prot;   omega =omega;
+ w  =prototypes;   omega =omega;
 
  % end of batch gradient descent
