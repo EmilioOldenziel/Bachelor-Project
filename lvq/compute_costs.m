@@ -7,7 +7,7 @@ function [costf,crout,marg,score]=compute_costs(fvec,lbl,prot,plbl,omat,mu)
 % fvec             nvf feature vectors of dim. ndim  fvec(1:nfv,1:ndim);
 % lbl              data labels  lbl(1:nfv);
 % prot,plbl        prototypes, prototype labels
-% omat             global matrix omega
+% omat             matrix omega
 
 % output:
 % costf  glvq-costs per example 
@@ -19,9 +19,9 @@ function [costf,crout,marg,score]=compute_costs(fvec,lbl,prot,plbl,omat,mu)
  np = length(plbl); 
  
   costf =0; marg=zeros(1,nfv); score=marg; crout=zeros(1,nfv);  
-    
-  omat = omat/sqrt(sum(sum(omat.*omat))); % normalized omat
-  
+  for ii=1:np
+    omat{ii} = omat{ii}/sqrt(sum(sum(omat{ii}.*omat{ii}))); % normalized omat
+  end
     for iii=1:nfv;                        % loop through examples
        fvc = fvec(iii,:); lbc=lbl(iii);
        distl = nan(np,1);
@@ -29,7 +29,7 @@ function [costf,crout,marg,score]=compute_costs(fvec,lbl,prot,plbl,omat,mu)
           distl(jk) = norm( omat*(fvc-prot(jk,:))')^2;
        end;
        % find the two winning prototypes for example iii
-       correct   = find (plbl == lbc); 
+       correct   = find (plblength(prot)l == lbc); 
        incorrect = find (plbl ~= lbc);
        [dJJ, JJJ] = min (distl (correct));
        [dKK, KKK] = min (distl (incorrect));
@@ -59,7 +59,7 @@ function [costf,crout,marg,score]=compute_costs(fvec,lbl,prot,plbl,omat,mu)
      
      % add penalty term 
      if (mu>0); 
-     costf=costf-mu/2*log(det(omat*omat'))/nfv; 
+     costf=costf-mu/2*log(det(omat{JJ}*omat{JJ}'))/nfv; 
      end; 
      
 end
