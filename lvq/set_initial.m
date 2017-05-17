@@ -27,10 +27,10 @@ function [proti,omi] = set_initial(fvec,lbl,plbl,mode,rndinit)
   %intitialize local relevance matrices per prototype and randomly
   if (mode == 4);
     omegas_initialized = cell(1, nprots);
-    for i=1:nprots;
+    for iom=1:nprots;
       omega_initialized = rand(ndim)-0.5;
       omega_initialized= omega_initialized'*omega_initialized;
-      omegas_initialized{i} = omega_initialized;
+      omegas_initialized{iom} = omega_initialized;
     end
     omi = omegas_initialized;
   else

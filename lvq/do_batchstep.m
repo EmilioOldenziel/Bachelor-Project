@@ -33,8 +33,8 @@ omat = omegai; %omega before step
 
 if(mode ==4)
   lambda = cell(1,np);
-  for i=1:np
-    lambda{i} = omat{i}'*omat{i};
+  for iom=1:np
+    lambda{iom} = omat{iom}'*omat{iom};
   end
 else
     lambda = omat'*omat; % lambda before step
@@ -43,8 +43,10 @@ end
 % omat=sqrtm(lambda);
 prot=proti;                            % prototypes before step
 
-     chp = 0*prot; chm = 0*omat;       % initialize change of prot,omega
-     
+     chp = 0*prot; 
+     if(mode~=4)
+       chm = 0*omat;       % initialize change of prot,omega
+     end
      for i= 1:nfv;                     % loop through all training examples
        fvi = fvec(i,:); lbi = lbl(i);  % actual example
   
@@ -132,11 +134,15 @@ prot=proti;                            % prototypes before step
       for ni=1:np;             % loop through (sum over) set of prototypes
           n2chw = n2chw + dot(chp(ni,:),chp(ni,:)); 
       end;
-      n2chm = sum(sum(chm.^2));% total 'length' of matrix update
+      n2chm = sum(sum(f1.^2));% total 'length' of matrix update
       prot = prot  + etap * chp/sqrt(n2chw);
 
       omat{jwin} = omat{jwin} + etam * f1/sqrt(n2chm);
       omat{kwin} = omat{kwin} + etam * f2/sqrt(n2chm);
+
+      xvec=[fvec;prot];               % concat. protos and fvecs
+      omat{jwin}= ((omat{jwin}*xvec')*pinv(xvec')); % corrected omega matrix
+      omat{kwin}= ((omat{kwin}*xvec')*pinv(xvec')); % corrected omega matrix 
     end
      
 end  % one full, normalized gradient step performed, return omat and prot

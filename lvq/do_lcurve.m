@@ -42,10 +42,6 @@ number_of_prototypes = length(plbl);       % total number of prototypes
   [prototypes_initial,omega_intitial] =  set_initial(fvec,lbl,plbl,mode,rndinit);
   prototypes=prototypes_initial;  omega=omega_intitial;   % initial values
 
-  for i=1:number_of_prototypes
-    omega_intitial{i}
-  end
-
 %copies of prototypes are stored in prototypes_original
 prototypes_original = zeros(n_original,size(prototypes,1),size(prototypes,2));
 
@@ -70,7 +66,13 @@ end
       prototypes_original(inistep,:,:)= prototypes;
       omega_original  (inistep,:,:)= omega;
       
-      omega=omega/sqrt(sum(sum(omega.*omega))); 
+      if(mode==4)
+        for iom=1:number_of_prototypes
+          omega{iom}=omega{iom}/sqrt(sum(sum(omega{iom}.*omega{iom})));
+        end;
+      else
+        omega=omega/sqrt(sum(sum(omega.*omega))); 
+      end;
       % compute costs without penalty term here
       [costf,~,marg,score]    = compute_costs(fvec,lbl,prototypes,plbl,omega,0);
       [costval,~,margval,scoreval]= ...
@@ -99,10 +101,13 @@ end
 % initial steps of Papari procedure complete, now remaining steps:
  
 for jstep=(n_original+1):totalsteps;  
- % calculate mean positions over latest steps
- protmean = squeeze(mean(prototypes_original,1)); 
- omega_mean = squeeze(mean(omega_original,1));
- omega_mean=omega_mean/sqrt(sum(sum(omega_mean.^2))); 
+% calculate mean positions over latest steps
+protmean = squeeze(mean(prototypes_original,1));
+omega_mean = cell(1,number_of_prototypes);
+for iom=1:number_of_prototypes
+  omega_mean{iom} = squeeze(mean(omega_original{iom},1));
+  omega_mean{iom}=omega_mean{iom}/sqrt(sum(sum(omega_mean{iom}.^2)));
+end
  % note: normalization does not change cost function value
  %       but is done for consistency
  

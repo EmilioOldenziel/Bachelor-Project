@@ -127,8 +127,8 @@ for krun=1:nruns;  % loop for validation runs
    
    protos(krun,:,:)=w;
    if (mode==4);
-       for i=1:nclasses;
-           lambda(krun,i,:,:) = omegas(i)'*omegas(i);
+       for iom=1:nclasses;
+           lambda(krun,i,:,:) = omega{iom}'*omega{iom};
        end
    else
        lambda(krun,:,:) = omega'*omega;
@@ -195,8 +195,12 @@ end;
  % errors, auc and class-wise errors and corresponding standard deviations
    protos_mean = wm; 
    protos_std  = sqrt(wm2 - wm.^2);
-   lambda_mean = squeeze(mean(lambda,1)); 
-   lambda_std  = sqrt(squeeze(mean(lambda.^2,1))-lambda_mean.^2); 
+   lambda_mean = cell(1,nprots);
+   lambda_std = cell(1,nprots);
+   for iom=1:nprots
+     lambda_mean{iom} = squeeze(mean(lambda{iom},1)); 
+     lambda_std{iom}  = sqrt(squeeze(mean(lambda{iom}.^2,1))-lambda_mean{iom}.^2);
+   end
    scftra= sqrt(scftra-mcftra.^2);   scfval= sqrt(scfval-mcfval.^2);
    stetra= sqrt(stetra-mtetra.^2);   steval= sqrt(steval-mteval.^2); 
    sauctra=sqrt(sauctra-mauctra.^2); saucval=sqrt(saucval-maucval.^2);
