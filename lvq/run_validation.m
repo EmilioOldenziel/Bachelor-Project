@@ -75,7 +75,7 @@ stetra=scftra; steval=scftra; sauctra=scftra; saucval=scftra;
 scwtra= zeros(totalsteps,nclasses); scwval=scwtra; 
 confmat=zeros(nclasses,nclasses); 
 
-lambdas=zeros(nruns,nclasses,ndim,ndim);    % local relevance matrices
+lambda=zeros(ndim,ndim,nprots,nruns);    % local relevance matrices
 protos=zeros(nruns,length(plbl),ndim);     % prototypes
 
 
@@ -117,18 +117,17 @@ for krun=1:nruns;  % loop for validation runs
       for i =1:numtest
          fvecout(i,:)= (fvecout(i,:)-mf)./st; % transfrom validation set
                                               % accordingly 
-      end; 
+      end;
   end;
   
   % perform one run and get learning curve variables
    [w,omega,cftra,tetra,cwtra,auctra,cfval,teval,cwval,aucval]= ...
     do_lcurve(fvectrain,lbltrain,fvecout,lblout,...
                                           plbl,totalsteps, mode);
-   
    protos(krun,:,:)=w;
    if (mode==4);
-       for iom=1:nclasses;
-           lambda(krun,i,:,:) = omega{iom}'*omega{iom};
+       for iom=1:nprots;
+           lambda(:,:,iom,krun) = omega(:,:,iom)'*omega(:,:,iom);
        end
    else
        lambda(krun,:,:) = omega'*omega;
@@ -195,11 +194,11 @@ end;
  % errors, auc and class-wise errors and corresponding standard deviations
    protos_mean = wm; 
    protos_std  = sqrt(wm2 - wm.^2);
-   lambda_mean = cell(1,nprots);
-   lambda_std = cell(1,nprots);
+   lambda_mean = zeros(ndim,ndim,nprots);
+   lambda_std = zeros(ndim,ndim,nprots);
    for iom=1:nprots
-     lambda_mean{iom} = squeeze(mean(lambda{iom},1)); 
-     lambda_std{iom}  = sqrt(squeeze(mean(lambda{iom}.^2,1))-lambda_mean{iom}.^2);
+     lambda_mean(:,:,iom) = squeeze(mean(lambda(:,:,iom,:),4))
+     lambda_std(:,:,iom)  = sqrt(squeeze(mean(lambda(:,:,iom,:).^2,4))-lambda_mean(:,:,iom).^2);
    end
    scftra= sqrt(scftra-mcftra.^2);   scfval= sqrt(scfval-mcfval.^2);
    stetra= sqrt(stetra-mtetra.^2);   steval= sqrt(steval-mteval.^2); 

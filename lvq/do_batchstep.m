@@ -30,11 +30,10 @@ np = size(proti,1);     % number of prototypes
 
 omat = omegai; %omega before step
 
-
 if(mode ==4)
-  lambda = cell(1,np);
+  lambda = zeros(ndim,ndim,np);
   for iom=1:np
-    lambda{iom} = omat{iom}'*omat{iom};
+    lambda(:,:,iom) = omat(:,:,iom)'*omat(:,:,iom);
   end
 else
     lambda = omat'*omat; % lambda before step
@@ -53,7 +52,7 @@ prot=proti;                            % prototypes before step
      % calculate squared distances to all prototypes
        dist = nan(np,1);                 % define squared distances
        for j=1:np;                       % distances from all prototypes
-         dist(j) = (norm( omat{j}*(fvi-prot(j,:))' ))^2;
+         dist(j) = (norm(omat(:,:,j)*(fvi-prot(j,:))' ))^2;
        end;
    
     % find the two winning prototypes
@@ -70,12 +69,12 @@ prot=proti;                            % prototypes before step
      
       DJ = (fvi-wJ)';  DK = (fvi-wK)';        % displacement vectors 
       norm_factor = (dJ+dK)^2;                % denominator of prefactor
-      dwJ = -(dK/norm_factor)*lambda{jwin}*DJ;      % change of correct winner
-      dwK =  (dJ/norm_factor)*lambda{kwin}*DK;      % change of incorrect winner
+      dwJ = -(dK/norm_factor)*lambda(:,:,jwin)*DJ;      % change of correct winner
+      dwK =  (dJ/norm_factor)*lambda(:,:,kwin)*DK;      % change of incorrect winner
       
       % matrix update, single (global) matrix omat for one example
-	    f1 = ( dK/norm_factor)*(omat{jwin}*DJ)*DJ';   % term 1 of matrix change
-	    f2 = (-dJ/norm_factor)*(omat{kwin}*DK)*DK';   % term 2 of matrix change
+	    f1 = ( dK/norm_factor)*(omat(:,:,jwin)*DJ)*DJ';   % term 1 of matrix change
+	    f2 = (-dJ/norm_factor)*(omat(:,:,kwin)*DK)*DK';   % term 2 of matrix change
      
       % negative gradient update added up over examples
       chp(jwin,:) = chp(jwin,:) - dwJ';  % correct    winner summed update
@@ -125,9 +124,10 @@ prot=proti;                            % prototypes before step
       % normalization of omega, corresponds to Trace(lambda) = 1
       omat = omat / sqrt( sum(sum(omat.^2)) );
     else
+      % mode 4
       if (mu>0)
-        f1 = f1 * mu*pinv(omat{jwin})';
-        f2 = f2 * mu*pinv(omat{kwin})';
+        f1 = f1 * mu*pinv(omat(:,:,jwin))';
+        f2 = f2 * mu*pinv(omat(:,:,kwin))';
       end
 
       n2chw = 0;               % zero initial value of sum
@@ -137,12 +137,12 @@ prot=proti;                            % prototypes before step
       n2chm = sum(sum(f1.^2));% total 'length' of matrix update
       prot = prot  + etap * chp/sqrt(n2chw);
 
-      omat{jwin} = omat{jwin} + etam * f1/sqrt(n2chm);
-      omat{kwin} = omat{kwin} + etam * f2/sqrt(n2chm);
+      omat(:,:,jwin) = omat(:,:,jwin) + etam * f1/sqrt(n2chm);
+      omat(:,:,kwin) = omat(:,:,kwin) + etam * f2/sqrt(n2chm);
 
       xvec=[fvec;prot];               % concat. protos and fvecs
-      omat{jwin}= ((omat{jwin}*xvec')*pinv(xvec')); % corrected omega matrix
-      omat{kwin}= ((omat{kwin}*xvec')*pinv(xvec')); % corrected omega matrix 
+      omat(:,:,jwin)= ((omat(:,:,jwin)*xvec')*pinv(xvec')); % corrected omega matrix
+      omat(:,:,kwin)= ((omat(:,:,kwin)*xvec')*pinv(xvec')); % corrected omega matrix 
     end
      
 end  % one full, normalized gradient step performed, return omat and prot

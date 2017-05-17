@@ -20,13 +20,13 @@ function [costf,crout,marg,score]=compute_costs(fvec,lbl,prot,plbl,omat,mu)
  
   costf =0; marg=zeros(1,nfv); score=marg; crout=zeros(1,nfv);  
   for iom=1:np
-    omat{iom} = omat{iom}/sqrt(sum(sum(omat{iom}.*omat{iom}))); % normalized omat
+    omat(:,:,iom) = omat(:,:,iom)/sqrt(sum(sum(omat(:,:,iom).*omat(:,:,iom)))); % normalized omat
   end
     for iii=1:nfv;                        % loop through examples
        fvc = fvec(iii,:); lbc=lbl(iii);
        distl = nan(np,1);
        for jk=1:np;
-          distl(jk) = norm( omat{jk}*(fvc-prot(jk,:))')^2;
+          distl(jk) = norm(omat(:,:,jk)*(fvc-prot(jk,:))')^2;
        end;
        % find the two winning prototypes for example iii
        correct   = find (plbl == lbc); 
@@ -59,7 +59,7 @@ function [costf,crout,marg,score]=compute_costs(fvec,lbl,prot,plbl,omat,mu)
      
      % add penalty term 
      if (mu>0); 
-     costf=costf-mu/2*log(det(omat{JJ}*omat{JJ}'))/nfv; 
+     costf=costf-mu/2*log(det(omat(:,:,JJ)*omat(:,:,JJ)'))/nfv; 
      end; 
      
 end

@@ -39,14 +39,14 @@ number_of_classes = length(unique(lbl));  % number of classes
 number_of_prototypes = length(plbl);       % total number of prototypes
           
 % initialize prototypes and omega
-  [prototypes_initial,omega_intitial] =  set_initial(fvec,lbl,plbl,mode,rndinit);
+  [prototypes_initial,omega_intitial] = set_initial(fvec,lbl,plbl,mode,rndinit);
   prototypes=prototypes_initial;  omega=omega_intitial;   % initial values
 
 %copies of prototypes are stored in prototypes_original
 prototypes_original = zeros(n_original,size(prototypes,1),size(prototypes,2));
 
 if(mode==4)
-  omega_original = cell(n_original,size(omega,2));
+  omega_original = zeros(ndim,ndim,number_of_prototypes,n_original);
 else
 %  copies of omegas are stored in omega_original
   omega_original   = zeros(n_original,size(omega,1) , size(omega,2));
@@ -64,11 +64,16 @@ end
   for inistep=1: n_original;
       [prototypes,omega]= do_batchstep(fvec,lbl,prototypes,plbl,omega,prototype_update_step_size,m_update_step_size,mu,mode); 
       prototypes_original(inistep,:,:)= prototypes;
-      omega_original  (inistep,:,:)= omega;
-      
       if(mode==4)
         for iom=1:number_of_prototypes
-          omega{iom}=omega{iom}/sqrt(sum(sum(omega{iom}.*omega{iom})));
+          omega_original(:,:,iom,inistep) = omega(:,:,iom);
+        end;
+      else
+        omega_original(inistep,:,:)= omega;
+      end
+      if(mode==4)
+        for iom=1:number_of_prototypes
+          omega(:,:,iom)=omega(:,:,iom)/sqrt(sum(sum(omega(:,:,iom).*omega(:,:,iom))));
         end;
       else
         omega=omega/sqrt(sum(sum(omega.*omega))); 
@@ -91,8 +96,6 @@ end
      auctra(inistep)=auroc; 
      [~,~,auroc,thresholds] = compute_roc(lblval>1,scoreval); 
      aucval(inistep)=auroc;
-      
-      
   
   end;
  
@@ -103,10 +106,10 @@ end
 for jstep=(n_original+1):totalsteps;  
 % calculate mean positions over latest steps
 protmean = squeeze(mean(prototypes_original,1));
-omega_mean = cell(1,number_of_prototypes);
+omega_mean = zeros(ndim,ndim,number_of_prototypes);
 for iom=1:number_of_prototypes
-  omega_mean{iom} = squeeze(mean(omega_original{iom},1));
-  omega_mean{iom}=omega_mean{iom}/sqrt(sum(sum(omega_mean{iom}.^2)));
+  omega_mean(:,:,iom) = squeeze(mean(omega_original(:,:,iom,:),4));
+  omega_mean(:,:,iom)=omega_mean(:,:,iom)/sqrt(sum(sum(omega_mean(:,:,iom).^2)));
 end
  % note: normalization does not change cost function value
  %       but is done for consistency
@@ -151,10 +154,14 @@ protbefore=prototypes;
  % update the copies of the latest steps, shift stack 
  for iicop = 1:n_original-1;
    prototypes_original(iicop,:,:)=prototypes_original(iicop+1,:,:);
-   omega_original(iicop,:,:)  =omega_original  (iicop+1,:,:);
+   for iom=1:number_of_prototypes
+    omega_original(:,:,iom,iicop) = omega_original(:,:,iom,iicop+1);
+   end;
  end;
- prototypes_original(n_original,:,:)=prototypes;  omega_original(n_original,:,:)=omega;
- 
+ prototypes_original(n_original,:,:)=prototypes;  
+ for iom=1:number_of_prototypes
+  omega_original(:,:,iom,n_original)=omega(:,:,iom);
+ end;
  % determine training and test set performances 
  % and calculate cost function without penalty terms
 [costf,~,marg,score] = compute_costs(fvec,lbl,prototypes,plbl,omega,0); 

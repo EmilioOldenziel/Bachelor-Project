@@ -18,7 +18,7 @@ number_of_coefficients = 20;
 [coefficients, transformationMatrix, backtransformationMatrix] = chebyshev(spectra, number_of_coefficients);
 
 %lvq validate with global matrices
-[gmlvq_mean,roc_val,lcurves_mean,lcurves_std,param_set] = run_validation(coefficients,newLabels,50, 10, 10);
+[gmlvq_mean,roc_val,lcurves_mean,lcurves_std,param_set] = run_validation(coefficients,newLabels,30, 1, 10);
 
 %save the figures in the results folder
 dataset_name = strrep(dataset_filename,'.csv','');
