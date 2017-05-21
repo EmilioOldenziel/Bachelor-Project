@@ -44,7 +44,8 @@ end;
     % display diagonal matrix elements as bar plot
     subplot(rows,col,((iw-1)*4)+2); 
       hold on;
-      bar(sort(eig(lambda(:,:,iw)),'descend')); title('eigenvalues of rel.mat.', ... 
+      bar(sort(eig(lambda(:,:,iw)),'descend')); 
+      title(strcat('eigenvalues of rel.mat. ','prot. ',num2str(iw)), ... 
           'FontName','LucidaSans', 'FontWeight','bold'); 
       xlabel('feature number'); 
       grid on;  axis 'auto y'; box on;
@@ -53,7 +54,8 @@ end;
     
     subplot(rows,col,((iw-1)*4)+3); 
       hold on;
-      bar(diag(lambda(:,:,iw))); title('rel. matrix, diag.', ... 
+      bar(diag(lambda(:,:,iw))); 
+      title(strcat('rel. matrix, diag.','prot. ',num2str(iw)), ... 
           'FontName','LucidaSans', 'FontWeight','bold'); 
       xlabel('feature number'); 
       grid on;  axis 'auto y'; box on;

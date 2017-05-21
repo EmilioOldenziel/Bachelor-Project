@@ -197,7 +197,7 @@ end;
    lambda_mean = zeros(ndim,ndim,nprots);
    lambda_std = zeros(ndim,ndim,nprots);
    for iom=1:nprots
-     lambda_mean(:,:,iom) = squeeze(mean(lambda(:,:,iom,:),4))
+     lambda_mean(:,:,iom) = squeeze(mean(lambda(:,:,iom,:),4));
      lambda_std(:,:,iom)  = sqrt(squeeze(mean(lambda(:,:,iom,:).^2,4))-lambda_mean(:,:,iom).^2);
    end
    scftra= sqrt(scftra-mcftra.^2);   scfval= sqrt(scfval-mcfval.^2);

@@ -51,6 +51,9 @@ else
 %  copies of omegas are stored in omega_original
   omega_original   = zeros(n_original,size(omega,1) , size(omega,2));
 end
+
+
+
   
    % learning curves, perfomance w.r.t. training and validation set
  cftra =  NaN(totalsteps,1); cfval = cftra; % cost fucnction and equivalent

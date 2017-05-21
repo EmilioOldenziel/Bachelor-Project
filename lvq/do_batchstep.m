@@ -143,6 +143,10 @@ prot=proti;                            % prototypes before step
       xvec=[fvec;prot];               % concat. protos and fvecs
       omat(:,:,jwin)= ((omat(:,:,jwin)*xvec')*pinv(xvec')); % corrected omega matrix
       omat(:,:,kwin)= ((omat(:,:,kwin)*xvec')*pinv(xvec')); % corrected omega matrix 
+      
+      % normalization of omega, corresponds to Trace(lambda) = 1
+      omat(:,:,jwin) = omat(:,:,jwin) / sqrt( sum(sum(omat(:,:,jwin).^2)));
+      omat(:,:,kwin) = omat(:,:,kwin) / sqrt( sum(sum(omat(:,:,kwin).^2)));
     end
      
 end  % one full, normalized gradient step performed, return omat and prot

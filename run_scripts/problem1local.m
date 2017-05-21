@@ -14,7 +14,7 @@ dataset_filename = 'sugar_neoVNIR1600.csv'
 [newData, newLabels] = reformulateDataset(spectra, labels, 1);
 
 % parse them to chebysev polynomials
-number_of_coefficients = 20;
+number_of_coefficients = 30;
 [coefficients, transformationMatrix, backtransformationMatrix] = chebyshev(spectra, number_of_coefficients);
 
 %lvq validate with global matrices

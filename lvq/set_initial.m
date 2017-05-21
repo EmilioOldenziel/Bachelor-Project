@@ -28,8 +28,12 @@ function [proti,omi] = set_initial(fvec,lbl,plbl,mode,rndinit)
   if (mode == 4);
     omegas_initialized = zeros(ndim,ndim,nprots);
     for iom=1:nprots;
-      omega_initialized = rand(ndim)-0.5;
-      omega_initialized= omega_initialized'*omega_initialized;
+      if(rndinit==1)
+        omega_initialized = rand(ndim)-0.5;
+        omega_initialized = omega_initialized'*omega_initialized;
+      else
+        omega_initialized = eye(ndim);
+      end;
       % normalization, Trace(Lambda)=1
       omega_initialized=omega_initialized/sqrt(sum(sum(omega_initialized.^2)));
       omegas_initialized(:,:,iom) = omega_initialized;
