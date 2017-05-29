@@ -52,8 +52,6 @@ else
   omega_original   = zeros(n_original,size(omega,1) , size(omega,2));
 end
 
-
-
   
    % learning curves, perfomance w.r.t. training and validation set
  cftra =  NaN(totalsteps,1); cfval = cftra; % cost fucnction and equivalent
@@ -102,7 +100,7 @@ end
   
   end;
  
-   [~,~,~,score]    = compute_costs(fvec,lbl,prototypes,plbl,omega,mu); 
+   [~,~,~,score] = compute_costs(fvec,lbl,prototypes,plbl,omega,mu); 
   
 % initial steps of Papari procedure complete, now remaining steps:
  
