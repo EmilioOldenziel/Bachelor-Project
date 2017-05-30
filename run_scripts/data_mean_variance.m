@@ -20,12 +20,12 @@ for problem_nr = 0:4;
 
     %plot mean and variance for every class
     for class_nr = 1:amount_of_classes;
-       class_data = coefficients(newLabels == class_nr, :);
+       class_data = spectra(newLabels == class_nr, :);
        class_mean = mean(class_data);
        class_variance= var(class_data);
        length(class_mean)
        length(class_variance)
-       errorbar(1:20, class_mean, class_variance);
+       errorbar(wavelengths, class_mean, class_variance);
        xlabel('wavelength (nm)');
     end;
     

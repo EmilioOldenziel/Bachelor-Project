@@ -21,5 +21,4 @@ addpath('../../no-nonsense-gmlvq-v2-3/')
     dir_path = strcat('../../../results/', dir_name);
     mkdir('../../../results/', dir_name);
     save_figures(dir_path);
-    etap = etap/4;
 %end
