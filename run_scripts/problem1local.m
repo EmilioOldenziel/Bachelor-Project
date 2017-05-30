@@ -15,13 +15,14 @@ dataset_filename = 'sugar_neoVNIR1600.csv'
 etam = 2;
 etap = 1;
 
-for number_of_coefficients=20:5:50
-    while(etam>(3/1000));
-        while(etap>(3/10000));
+%for number_of_coefficients=20:5:50
+    %while(etam>(3/1000));
+        %while(etap>(3/10000));
         % parse them to chebysev polynomials
-        %number_of_coefficients = 20;
+        number_of_coefficients = 20;
         [coefficients, transformationMatrix, backtransformationMatrix] = chebyshev(newData, number_of_coefficients);
-        strcat(num2str(number_of_coefficients), 'coeficients')
+        strcat(num2str(number_of_coefficients), 'coefficients')
+        
         %lvq validate with global matrices
         [gmlvq_mean,roc_val,lcurves_mean,lcurves_std,param_set] = run_validation(coefficients,newLabels,50, 10, 10, [1,2,3],etam, etap);
 
@@ -32,9 +33,9 @@ for number_of_coefficients=20:5:50
         dir_path = strcat('../../../results/', dir_name);
         mkdir('../../../results/', dir_name);
         save_figures(dir_path);
-        etap = etap/4;
-        end;
-    etam = etam/4;
-    end;
-end;
+        %etap = etap/4;
+        %end;
+    %etam = etam/4;
+    %end;
+%end;
 

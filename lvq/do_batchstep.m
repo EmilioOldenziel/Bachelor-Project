@@ -134,11 +134,13 @@ prot=proti;                            % prototypes before step
       for ni=1:np;             % loop through (sum over) set of prototypes
           n2chw = n2chw + dot(chp(ni,:),chp(ni,:)); 
       end;
-      n2chm = sum(sum(f1.^2));% total 'length' of matrix update
+      n2chmf1 = sum(sum(f1.^2));% total 'length' of matrix update
+      n2chmf2 = sum(sum(f2.^2));% total 'length' of matrix update
+
       prot = prot  + etap * chp/sqrt(n2chw);
 
-      omat(:,:,jwin) = omat(:,:,jwin) + etam * f1/sqrt(n2chm);
-      omat(:,:,kwin) = omat(:,:,kwin) + etam * f2/sqrt(n2chm);
+      omat(:,:,jwin) = omat(:,:,jwin) + etam * f1/sqrt(n2chmf1);
+      omat(:,:,kwin) = omat(:,:,kwin) + etam * f2/sqrt(n2chmf2);
 
       xvec=[fvec;prot];               % concat. protos and fvecs
       omat(:,:,jwin)= ((omat(:,:,jwin)*xvec')*pinv(xvec')); % corrected omega matrix
@@ -148,7 +150,7 @@ prot=proti;                            % prototypes before step
       omat(:,:,jwin) = omat(:,:,jwin) / sqrt( sum(sum(omat(:,:,jwin).^2)));
       omat(:,:,kwin) = omat(:,:,kwin) / sqrt( sum(sum(omat(:,:,kwin).^2)));
     end
-     
+    
 end  % one full, normalized gradient step performed, return omat and prot
 
 
