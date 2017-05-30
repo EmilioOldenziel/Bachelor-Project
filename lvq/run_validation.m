@@ -4,10 +4,12 @@
 
 function [gmlvq_mean, roc_validation, lcurves_mean,...
           lcurves_sdt, param_set] = ...
-  run_validation(fvec,lbl,totalsteps,nruns,prctg,plbl) 
+  run_validation(fvec,lbl,totalsteps,nruns,prctg,plbl, ...
+  etam_override, etap_override) 
 
 %mode 4 is LGMLVQ
 mode = 4;
+
 % general algorithm settings and parameters of the Papari procedure
             % general algorithm settings and parameters of the Papari procedure
 [showplots,doztr,mode,rndinit, etam, etap, mu, decfac, incfac, ncop] =...
@@ -38,6 +40,14 @@ close all;
  rng('default'); 
  rngseed=4713;
  rng(rngseed); 
+
+if (etam_override);
+    etam = etam_override;
+end
+
+if (etap_override);
+    etap = etap_override;
+end
 
 % set defaults if necessary
 
@@ -205,6 +215,8 @@ end;
    sauctra=sqrt(sauctra-mauctra.^2); saucval=sqrt(saucval-maucval.^2);
    scwtra =sqrt(scwtra- mcwtra.^2);  scwval= sqrt(scwval - mcwval.^2);
 
+   mtetra
+   mteval
  % define structures for output
    % mean learning curves
    lcurves_mean = ... 
