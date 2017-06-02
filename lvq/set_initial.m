@@ -16,7 +16,6 @@ function [proti,omi] = set_initial(fvec,lbl,plbl,mode,rndinit)
   ndim  = size(fvec,2);         % dimension of feature vectors
   nprots= length(plbl);         % total number of prototypes
   
-  
   for ic=1:nprots; % compute class-conditional means
       proti(ic,:) = mean(fvec(lbl==plbl(ic),:),1) ;
   end; 

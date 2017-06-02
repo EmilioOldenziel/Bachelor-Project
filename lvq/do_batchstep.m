@@ -27,7 +27,6 @@ nfv = length(lbl);      % number of feature vectors (training samples)
 cls = unique(lbl);      % set of class labels
 np = size(proti,1);     % number of prototypes
 
-
 omat = omegai; %omega before step
 
 if(mode ==4)
@@ -77,7 +76,7 @@ prot=proti;                            % prototypes before step
 	    f2 = (-dJ/norm_factor)*(omat(:,:,kwin)*DK)*DK';   % term 2 of matrix change
      
       % negative gradient update added up over examples
-      chp(jwin,:) = chp(jwin,:) - dwJ';  % correct    winner summed update
+      chp(jwin,:) = chp(jwin,:) - dwJ';  % correct   winner summed update
       chp(kwin,:) = chp(kwin,:) - dwK';  % incorrect winner summed update
       if(mode~=4)
 	      chm = chm - (f1 + f2);             % matrix summed update
@@ -134,21 +133,32 @@ prot=proti;                            % prototypes before step
       for ni=1:np;             % loop through (sum over) set of prototypes
           n2chw = n2chw + dot(chp(ni,:),chp(ni,:)); 
       end;
-      n2chmf1 = sum(sum(f1.^2));% total 'length' of matrix update
-      n2chmf2 = sum(sum(f2.^2));% total 'length' of matrix update
+      n2chm_f1 = sum(sum(f1.^2));% total 'length' of matrix update
+      n2chm_f2 = sum(sum(f2.^2));% total 'length' of matrix update
 
       prot = prot  + etap * chp/sqrt(n2chw);
 
-      omat(:,:,jwin) = omat(:,:,jwin) + etam * f1/sqrt(n2chmf1);
-      omat(:,:,kwin) = omat(:,:,kwin) + etam * f2/sqrt(n2chmf2);
+      xvec=[fvec;prot]; % concat. protos and fvecs
 
-      xvec=[fvec;prot];               % concat. protos and fvecs
+      %update, correct and normalize winner matrix
+      omat(:,:,jwin) = omat(:,:,jwin) + etam * f1/sqrt(n2chm_f1);
       omat(:,:,jwin)= ((omat(:,:,jwin)*xvec')*pinv(xvec')); % corrected omega matrix
-      omat(:,:,kwin)= ((omat(:,:,kwin)*xvec')*pinv(xvec')); % corrected omega matrix 
-      
-      % normalization of omega, corresponds to Trace(lambda) = 1
       omat(:,:,jwin) = omat(:,:,jwin) / sqrt( sum(sum(omat(:,:,jwin).^2)));
+
+
+      %update, correct and normalize loser matrix
+      omat(:,:,kwin) = omat(:,:,kwin) + etam * f2/sqrt(n2chm_f2);
+      omat(:,:,kwin)= ((omat(:,:,kwin)*xvec')*pinv(xvec')); % corrected omega matrix
       omat(:,:,kwin) = omat(:,:,kwin) / sqrt( sum(sum(omat(:,:,kwin).^2)));
+
+      %update, correct and normalize all loser matrices
+      % for iom=1:length(incorrect)
+      %   omat(:,:,incorrect(iom)) = omat(:,:,incorrect(iom)) + etam * f2/sqrt(n2chmf2);
+      %   omat(:,:,incorrect(iom))= ((omat(:,:,incorrect(iom))*xvec')*pinv(xvec')); % corrected omega matrix 
+      %   omat(:,:,incorrect(iom)) = omat(:,:,incorrect(iom)) / sqrt( sum(sum(omat(:,:,incorrect(iom)).^2)));
+      % end
+
+
     end
     
 end  % one full, normalized gradient step performed, return omat and prot

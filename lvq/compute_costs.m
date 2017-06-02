@@ -58,7 +58,7 @@ function [costf,crout,marg,score]=compute_costs(fvec,lbl,prot,plbl,omat,mu)
      end;
      
      % add penalty term 
-     if (mu>0); 
+     if (mu>0);
      costf=costf-mu/2*log(det(omat(:,:,JJ)*omat(:,:,JJ)'))/nfv; 
      end; 
      

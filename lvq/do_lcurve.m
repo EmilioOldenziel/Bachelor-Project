@@ -39,8 +39,8 @@ number_of_classes = length(unique(lbl));  % number of classes
 number_of_prototypes = length(plbl);       % total number of prototypes
           
 % initialize prototypes and omega
-  [prototypes_initial,omega_intitial] = set_initial(fvec,lbl,plbl,mode,rndinit);
-  prototypes=prototypes_initial;  omega=omega_intitial;   % initial values
+[prototypes_initial,omega_intitial] = set_initial(fvec,lbl,plbl,mode,rndinit);
+prototypes=prototypes_initial;  omega=omega_intitial;   % initial values
 
 %copies of prototypes are stored in prototypes_original
 prototypes_original = zeros(n_original,size(prototypes,1),size(prototypes,2));
@@ -51,7 +51,6 @@ else
 %  copies of omegas are stored in omega_original
   omega_original   = zeros(n_original,size(omega,1) , size(omega,2));
 end
-
   
    % learning curves, perfomance w.r.t. training and validation set
  cftra =  NaN(totalsteps,1); cfval = cftra; % cost fucnction and equivalent

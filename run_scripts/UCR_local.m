@@ -15,7 +15,7 @@ etap = 1;
     [coefficients, transformationMatrix, backtransformationMatrix] = chebyshev(x, number_of_coefficients);
     strcat(num2str(number_of_coefficients), 'coeficients')
     %lvq validate with global matrices
-    [gmlvq_mean,roc_val,lcurves_mean,lcurves_std,param_set] = run_validation(coefficients,label,50, 1, 10, [1,2,3,4,5,6,7], etam, etap);
+    [gmlvq_mean,roc_val,lcurves_mean,lcurves_std,param_set] = run_validation(coefficients,label,100, 10, 15, [1,2,3,4,5,6,7], etam, etap);
     
     %save the figures in the results folder
     dataset_name = 'UCR_Plane';

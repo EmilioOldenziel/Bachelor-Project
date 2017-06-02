@@ -59,7 +59,7 @@ elseif (mode==3) % GLVQ, equivalent to Euclidean distance
 end;   
   decfac = 1.5;       % step size factor (decrease) for Papari steps
   incfac = 1.1;       % step size factor (increase) for all steps
-  ncop = 5;           % number of waypoints stored and averaged      
+  ncop = 20;           % number of waypoints stored and averaged      
 
 if (nfv <= ndim & mode==0); 
    display('dim. > # of examples, null-space correction recommended');

@@ -17,11 +17,13 @@ if(size(lbl,2)>1);   % lbl may be column or row vector
     warning('vector lbl has been transposed');
 end;
 
+
 if size(fvec,1) ~= length(lbl) 
     error('number of training labels differs from number of samples');
 end; 
 
 if((min(lbl)~=1)|max(lbl)~=length(unique(lbl)))
+unique(lbl) 
    warning(['unique(lbl)=  ',num2str(unique(lbl))]);
    error('data labels should be: 1,2,3,...,nclasses');
 end;

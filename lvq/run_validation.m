@@ -215,8 +215,6 @@ end;
    sauctra=sqrt(sauctra-mauctra.^2); saucval=sqrt(saucval-maucval.^2);
    scwtra =sqrt(scwtra- mcwtra.^2);  scwval= sqrt(scwval - mcwval.^2);
 
-   mtetra
-   mteval
  % define structures for output
    % mean learning curves
    lcurves_mean = ... 
