@@ -4,11 +4,7 @@
 
 function [gmlvq_mean, roc_validation, lcurves_mean,...
           lcurves_sdt, param_set] = ...
-  run_validation(fvec,lbl,totalsteps,nruns,prctg,plbl, ...
-  etam_override, etap_override) 
-
-%mode 4 is LGMLVQ
-mode = 4;
+  run_validation(fvec,lbl,totalsteps,nruns,prctg,plbl, mode)
 
 % general algorithm settings and parameters of the Papari procedure
             % general algorithm settings and parameters of the Papari procedure
@@ -40,14 +36,6 @@ close all;
  rng('default'); 
  rngseed=4713;
  rng(rngseed); 
-
-if (etam_override);
-    etam = etam_override;
-end
-
-if (etap_override);
-    etap = etap_override;
-end
 
 % set defaults if necessary
 
@@ -85,7 +73,11 @@ stetra=scftra; steval=scftra; sauctra=scftra; saucval=scftra;
 scwtra= zeros(totalsteps,nclasses); scwval=scwtra; 
 confmat=zeros(nclasses,nclasses); 
 
-lambda=zeros(ndim,ndim,nprots,nruns);    % local relevance matrices
+if(mode==4)
+    lambda=zeros(ndim,ndim,nprots,nruns);    % local relevance matrices
+else
+    lambda=zeros(nruns,ndim,ndim);             % relevance matrix
+end;
 protos=zeros(nruns,length(plbl),ndim);     % prototypes
 
 
@@ -144,7 +136,7 @@ for krun=1:nruns;  % loop for validation runs
    end
 
    % get final classification labels and score
-   [~,crout,~,score]    = compute_costs(fvecout,lblout,w,plbl,omega,mu); 
+   [~,crout,~,score]    = compute_costs(fvecout,lblout,w,plbl,omega,mu,mode); 
    % compute ROC
    [tpr,fpr,~,thresh] = compute_roc(lblout>1,score);
    % [thresh,tpr,fpr,auroc]=eval_roc(score,lblout>1,nthresh);
@@ -204,12 +196,17 @@ end;
  % errors, auc and class-wise errors and corresponding standard deviations
    protos_mean = wm; 
    protos_std  = sqrt(wm2 - wm.^2);
-   lambda_mean = zeros(ndim,ndim,nprots);
-   lambda_std = zeros(ndim,ndim,nprots);
-   for iom=1:nprots
-     lambda_mean(:,:,iom) = squeeze(mean(lambda(:,:,iom,:),4));
-     lambda_std(:,:,iom)  = sqrt(squeeze(mean(lambda(:,:,iom,:).^2,4))-lambda_mean(:,:,iom).^2);
-   end
+   if(mode==4)
+       lambda_mean = zeros(ndim,ndim,nprots);
+       lambda_std = zeros(ndim,ndim,nprots);
+       for iom=1:nprots
+           lambda_mean(:,:,iom) = squeeze(mean(lambda(:,:,iom,:),4));
+           lambda_std(:,:,iom)  = sqrt(squeeze(mean(lambda(:,:,iom,:).^2,4))-lambda_mean(:,:,iom).^2);
+       end;
+    else
+           lambda_mean = squeeze(mean(lambda,1)); 
+           lambda_std  = sqrt(squeeze(mean(lambda.^2,1))-lambda_mean.^2); 
+    end;
    scftra= sqrt(scftra-mcftra.^2);   scfval= sqrt(scfval-mcfval.^2);
    stetra= sqrt(stetra-mtetra.^2);   steval= sqrt(steval-mteval.^2); 
    sauctra=sqrt(sauctra-mauctra.^2); saucval=sqrt(saucval-maucval.^2);
@@ -348,7 +345,7 @@ if(showplots==1);   % display results
    hold off;
 
    figure(3);    % visualize the GMLVQ system 
-   display_gmlvq(protos_mean,lambda_mean,plbl,ndim);  
+   display_gmlvq(protos_mean,lambda_mean,plbl,ndim, mode);  
    
 end; 
  

@@ -9,11 +9,6 @@ function [showplots,doztr,mode,rndinit,etam,etap,mu,decfac,incfac,ncop] =...
 nfv=size(fvec,1);
 ndim = size(fvec,2);
 
-if (mode ~= 4)
-  % GMLVQ parameters, explained below
-  mode       = 1; 
-end
-
 showplots  = 1;  
 doztr      = 1; 
 rndinit    = 0; 
@@ -59,7 +54,7 @@ elseif (mode==3) % GLVQ, equivalent to Euclidean distance
 end;   
   decfac = 1.5;       % step size factor (decrease) for Papari steps
   incfac = 1.1;       % step size factor (increase) for all steps
-  ncop = 20;           % number of waypoints stored and averaged      
+  ncop = 5;           % number of waypoints stored and averaged      
 
 if (nfv <= ndim & mode==0); 
    display('dim. > # of examples, null-space correction recommended');

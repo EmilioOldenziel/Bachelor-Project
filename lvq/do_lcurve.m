@@ -79,9 +79,9 @@ end
         omega=omega/sqrt(sum(sum(omega.*omega))); 
       end;
       % compute costs without penalty term here
-      [costf,~,marg,score]    = compute_costs(fvec,lbl,prototypes,plbl,omega,0);
+      [costf,~,marg,score]    = compute_costs(fvec,lbl,prototypes,plbl,omega,0,mode);
       [costval,~,margval,scoreval]= ...
-                         compute_costs(fvecval,lblval,prototypes,plbl,omega,0); 
+                         compute_costs(fvecval,lblval,prototypes,plbl,omega,0,mode); 
       cftra(inistep)= costf; cfval(inistep)= costval;
       
       tetra(inistep)= sum(marg>0)/nfv; 
@@ -99,17 +99,23 @@ end
   
   end;
  
-   [~,~,~,score] = compute_costs(fvec,lbl,prototypes,plbl,omega,mu); 
+   [~,~,~,score] = compute_costs(fvec,lbl,prototypes,plbl,omega,mu,mode); 
   
 % initial steps of Papari procedure complete, now remaining steps:
  
 for jstep=(n_original+1):totalsteps;  
 % calculate mean positions over latest steps
 protmean = squeeze(mean(prototypes_original,1));
-omega_mean = zeros(ndim,ndim,number_of_prototypes);
-for iom=1:number_of_prototypes
-  omega_mean(:,:,iom) = squeeze(mean(omega_original(:,:,iom,:),4));
-  omega_mean(:,:,iom)=omega_mean(:,:,iom)/sqrt(sum(sum(omega_mean(:,:,iom).^2)));
+
+if(mode==4)
+  omega_mean = zeros(ndim,ndim,number_of_prototypes);
+  for iom=1:number_of_prototypes
+    omega_mean(:,:,iom) = squeeze(mean(omega_original(:,:,iom,:),4));
+    omega_mean(:,:,iom)=omega_mean(:,:,iom)/sqrt(sum(sum(omega_mean(:,:,iom).^2)));
+  end
+else
+   omega_mean = squeeze(mean(omega_original,1));
+   omega_mean=omega_mean/sqrt(sum(sum(omega_mean.^2))); 
 end
  % note: normalization does not change cost function value
  %       but is done for consistency
@@ -117,8 +123,8 @@ end
  
  
  % compute cost functions for mean prototypes, mean matrix and both 
-[costmp,~,~,score ] = compute_costs(fvec,lbl,protmean,plbl,omega, 0);
-[costmm,~,~,score ] = compute_costs(fvec,lbl,prototypes,    plbl,omega_mean,mu); 
+[costmp,~,~,score ] = compute_costs(fvec,lbl,protmean,plbl,omega, 0,mode);
+[costmm,~,~,score ] = compute_costs(fvec,lbl,prototypes,    plbl,omega_mean,mu,mode); 
 % [costm, ~,~,score ] = compute_costs(fvec,lbl,protmean,plbl,omega_mean,mu); 
 
 % remember old positions for Papari procedure
@@ -127,7 +133,7 @@ protbefore=prototypes;
  
  % perform next step and compute costs etc.
 [prototypes,omega]= do_batchstep (fvec,lbl,prototypes,plbl,omega,prototype_update_step_size,m_update_step_size,mu,mode);  
-[costf,~,~,score] = compute_costs(fvec,lbl,prototypes,plbl,omega,mu); 
+[costf,~,~,score] = compute_costs(fvec,lbl,prototypes,plbl,omega,mu,mode); 
 
 % by default, step sizes are increased in every step
  m_update_step_size=m_update_step_size*incfac; % (small) increase of step sizes
@@ -135,8 +141,8 @@ protbefore=prototypes;
 
 % costfunction values to compare with for Papari procedure
 % evaluated w.r.t. changing only matrix or prototype
-[costfp,~,~,score] = compute_costs(fvec,lbl,prototypes,plbl,ombefore,0);
-[costfm,~,~,score] = compute_costs(fvec,lbl,protbefore,plbl,omega,mu); 
+[costfp,~,~,score] = compute_costs(fvec,lbl,prototypes,plbl,ombefore,0,mode);
+[costfm,~,~,score] = compute_costs(fvec,lbl,protbefore,plbl,omega,mu,mode); 
    
 % heuristic extension of Papari procedure
 % treats matrix and prototype step sizes separately
@@ -154,19 +160,27 @@ protbefore=prototypes;
  % update the copies of the latest steps, shift stack 
  for iicop = 1:n_original-1;
    prototypes_original(iicop,:,:)=prototypes_original(iicop+1,:,:);
-   for iom=1:number_of_prototypes
-    omega_original(:,:,iom,iicop) = omega_original(:,:,iom,iicop+1);
+   if(mode==4)
+      for iom=1:number_of_prototypes
+      omega_original(:,:,iom,iicop) = omega_original(:,:,iom,iicop+1);
+      end;
+   else
+     omega_original(iicop,:,:)  =omega_original(iicop+1,:,:);
    end;
  end;
- prototypes_original(n_original,:,:)=prototypes;  
- for iom=1:number_of_prototypes
-  omega_original(:,:,iom,n_original)=omega(:,:,iom);
- end;
+ prototypes_original(n_original,:,:)=prototypes;
+ if(mode==4)
+    for iom=1:number_of_prototypes
+      omega_original(:,:,iom,n_original)=omega(:,:,iom);
+    end;
+  else
+    omega_original(n_original,:,:)=omega;
+  end;
  % determine training and test set performances 
  % and calculate cost function without penalty terms
-[costf,~,marg,score] = compute_costs(fvec,lbl,prototypes,plbl,omega,0); 
+[costf,~,marg,score] = compute_costs(fvec,lbl,prototypes,plbl,omega,0,mode); 
 [costval,~,margval,scoreval]= ...
-                     compute_costs(fvecval,lblval,prototypes,plbl,omega,0);
+                     compute_costs(fvecval,lblval,prototypes,plbl,omega,0,mode);
 
        
  cftra(jstep)= costf; cfval(jstep)= costval;

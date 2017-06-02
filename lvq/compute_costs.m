@@ -1,4 +1,4 @@
-function [costf,crout,marg,score]=compute_costs(fvec,lbl,prot,plbl,omat,mu)
+function [costf,crout,marg,score]=compute_costs(fvec,lbl,prot,plbl,omat,mu,mode)
 
 % calculates gmlvq cost function, labels and margins for a set of 
 % labelled feature vectors, given a particular lvq system
@@ -18,16 +18,24 @@ function [costf,crout,marg,score]=compute_costs(fvec,lbl,prot,plbl,omat,mu)
  nfv= size(fvec,1); ndim = size(fvec,2);  % # and dim. of feature vectors
  np = length(plbl); 
  
-  costf =0; marg=zeros(1,nfv); score=marg; crout=zeros(1,nfv);  
-  for iom=1:np
-    omat(:,:,iom) = omat(:,:,iom)/sqrt(sum(sum(omat(:,:,iom).*omat(:,:,iom)))); % normalized omat
-  end
+  costf =0; marg=zeros(1,nfv); score=marg; crout=zeros(1,nfv);
+  if(mode==4)
+    for iom=1:np
+      omat(:,:,iom) = omat(:,:,iom)/sqrt(sum(sum(omat(:,:,iom).*omat(:,:,iom)))); % normalized omat
+    end
+  else
+    omat = omat/sqrt(sum(sum(omat.*omat)));
+  end;
     for iii=1:nfv;                        % loop through examples
        fvc = fvec(iii,:); lbc=lbl(iii);
        distl = nan(np,1);
-       for jk=1:np;
-          distl(jk) = norm(omat(:,:,jk)*(fvc-prot(jk,:))')^2;
-       end;
+          for jk=1:np;
+              if(mode==4)
+                distl(jk) = norm(omat(:,:,jk)*(fvc-prot(jk,:))')^2;
+              else
+                distl(jk) = norm(omat*(fvc-prot(jk,:))')^2;
+              end;
+          end;
        % find the two winning prototypes for example iii
        correct   = find (plbl == lbc); 
        incorrect = find (plbl ~= lbc);
@@ -59,7 +67,11 @@ function [costf,crout,marg,score]=compute_costs(fvec,lbl,prot,plbl,omat,mu)
      
      % add penalty term 
      if (mu>0);
-     costf=costf-mu/2*log(det(omat(:,:,JJ)*omat(:,:,JJ)'))/nfv; 
+        if(mode==4)
+          costf=costf-mu/2*log(det(omat(:,:,JJ)*omat(:,:,JJ)'))/nfv;
+        else
+          costf=costf-mu/2*log(det(omat*omat'))/nfv; 
+        end;
      end; 
      
 end

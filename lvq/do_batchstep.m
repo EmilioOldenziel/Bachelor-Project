@@ -49,10 +49,14 @@ prot=proti;                            % prototypes before step
        fvi = fvec(i,:); lbi = lbl(i);  % actual example
   
      % calculate squared distances to all prototypes
-       dist = nan(np,1);                 % define squared distances
-       for j=1:np;                       % distances from all prototypes
-         dist(j) = (norm(omat(:,:,j)*(fvi-prot(j,:))' ))^2;
-       end;
+      dist = nan(np,1);                 % define squared distances
+         for j=1:np;                       % distances from all prototypes
+             if(mode ==4)
+                 dist(j) = (norm(omat(:,:,j)*(fvi-prot(j,:))' ))^2;
+            else
+                 dist(j) = (norm(omat*(fvi-prot(j,:))' ))^2;
+            end
+         end;
    
     % find the two winning prototypes
       correct =   find (plbl == lbi);     % all correct prototype indices
@@ -68,13 +72,21 @@ prot=proti;                            % prototypes before step
      
       DJ = (fvi-wJ)';  DK = (fvi-wK)';        % displacement vectors 
       norm_factor = (dJ+dK)^2;                % denominator of prefactor
-      dwJ = -(dK/norm_factor)*lambda(:,:,jwin)*DJ;      % change of correct winner
-      dwK =  (dJ/norm_factor)*lambda(:,:,kwin)*DK;      % change of incorrect winner
-      
+      if(mode ==4)
+        dwJ = -(dK/norm_factor)*lambda(:,:,jwin)*DJ;      % change of correct winner
+        dwK =  (dJ/norm_factor)*lambda(:,:,kwin)*DK;      % change of incorrect winner
+
+        f1 = ( dK/norm_factor)*(omat(:,:,jwin)*DJ)*DJ';   % term 1 of matrix change
+	      f2 = (-dJ/norm_factor)*(omat(:,:,kwin)*DK)*DK';   % term 2 of matrix change
+      else
+        dwJ = -(dK/norm_factor)*lambda*DJ;    % change of correct winner
+        dwK =  (dJ/norm_factor)*lambda*DK;    % change of incorrect winner
+
+        f1 = ( dK/norm_factor)*(omat*DJ)*DJ';   % term 1 of matrix change
+	      f2 = (-dJ/norm_factor)*(omat*DK)*DK';   % term 2 of matrix change
+      end
       % matrix update, single (global) matrix omat for one example
-	    f1 = ( dK/norm_factor)*(omat(:,:,jwin)*DJ)*DJ';   % term 1 of matrix change
-	    f2 = (-dJ/norm_factor)*(omat(:,:,kwin)*DK)*DK';   % term 2 of matrix change
-     
+	  
       % negative gradient update added up over examples
       chp(jwin,:) = chp(jwin,:) - dwJ';  % correct   winner summed update
       chp(kwin,:) = chp(kwin,:) - dwK';  % incorrect winner summed update
