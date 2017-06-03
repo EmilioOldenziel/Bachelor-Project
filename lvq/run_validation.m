@@ -143,7 +143,12 @@ for krun=1:nruns;  % loop for validation runs
    tprs(krun,:) =tpr; % true positive rates
    fprs(krun,:) =fpr; % false positive rates
    
-   
+      %f-measure
+   [f_micro, f_macro] = compute_f_measure(fvecout,lblout,w,plbl,omega,mu,mode);
+
+   display(['fmicro: ' num2str(f_micro)]);
+   display(['fmacro: ' num2str(f_macro)]);
+
    for ios = 1:length(lblout);  % loop through all classes
                                 % computation of actual confusion matrix
        confact(lblout(ios),crout(ios))=confact(lblout(ios),crout(ios))+1;
