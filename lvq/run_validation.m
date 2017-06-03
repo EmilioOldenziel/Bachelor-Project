@@ -251,31 +251,29 @@ end;
               
 if(showplots==1);   % display results
      
-  if(mode~=4)
-        figure(1); 
-        onlyat= floor(linspace(1,totalsteps,10));  % set "time" points for output
-        onlyatval= onlyat(1:end-1)+1;
-            
-        figure(1)  
-        msize=15; % size of symbols
-        if (totalsteps< 50); msize=20; end;
+    figure(1); 
+    onlyat= floor(linspace(1,totalsteps,10));  % set "time" points for output
+    onlyatval= onlyat(1:end-1)+1;
         
-        subplot(3,2,1);                 % total training and validation errors
-        % axis([0 totalsteps 0 1.2*max(mteval)]); 
-        plot(1:totalsteps,mtetra,':.',1:totalsteps,mteval,':.',...
-                                                    'MarkerSize',msize); 
-        axis tight; axis 'auto y'; 
-        hold on; box on;
-        title('total error rates',...
-            'FontName','LucidaSans', 'FontWeight','bold'); 
-        legend('training','test','Location','Best'); 
-        xlabel('gradient steps');
-        errorbar(onlyat,mtetra(onlyat),stetra(onlyat)/sqrt(nruns),...
-                'co','MarkerSize',1); 
-        errorbar(onlyatval,mteval(onlyatval),steval(onlyatval)/sqrt(nruns),...
-                'go','MarkerSize',1);  
-        hold off;
-   end
+    figure(1)  
+    msize=15; % size of symbols
+    if (totalsteps< 50); msize=20; end;
+    
+    subplot(3,2,1);                 % total training and validation errors
+    % axis([0 totalsteps 0 1.2*max(mteval)]); 
+    plot(1:totalsteps,mtetra,':.',1:totalsteps,mteval,':.',...
+                                                'MarkerSize',msize); 
+    axis tight; axis 'auto y'; 
+    hold on; box on;
+    title('total error rates',...
+        'FontName','LucidaSans', 'FontWeight','bold'); 
+    legend('training','test','Location','Best'); 
+    xlabel('gradient steps');
+    errorbar(onlyat,mtetra(onlyat),stetra(onlyat)/sqrt(nruns),...
+            'co','MarkerSize',1); 
+    errorbar(onlyatval,mteval(onlyatval),steval(onlyatval)/sqrt(nruns),...
+            'go','MarkerSize',1);  
+    hold off;
   
    
    subplot(3,2,2);                 % AUC(ROC) for training and validation 

@@ -13,7 +13,8 @@ function [f1_micro, f1_macro]=compute_f_measure(fvec,lbl,prot,plbl,omat,mu,mode)
     % recoil: amount of what is classified
     % precision: amount of what is classified correctly
 
-    nfv= size(fvec,1);
+    nfv= size(fvec,1); ndim = size(fvec,2);  % # and dim. of feature vectors
+    n_classes = length(unique(lbl));
     np = length(plbl); 
 
     crout=zeros(1,nfv);
@@ -50,7 +51,7 @@ function [f1_micro, f1_macro]=compute_f_measure(fvec,lbl,prot,plbl,omat,mu,mode)
     false_positives = zeros(1,nfv);
     false_negatives = zeros(1,nfv);
 
-    for iii=1:nfv
+    for iii=1:n_classes
         correct_fvecs = (lbl'==iii);
         true_positives(iii) = sum((crout == iii)==correct_fvecs);
         false_positives(iii) = sum((crout == iii)~=correct_fvecs);
@@ -60,8 +61,8 @@ function [f1_micro, f1_macro]=compute_f_measure(fvec,lbl,prot,plbl,omat,mu,mode)
     precision_micro = sum(true_positives) / sum(true_positives+false_positives);
     recall_micro = sum(true_positives) / sum(true_positives+false_negatives);
 
-    precision_macro = sum(true_positives / (true_positives+false_positives)) / nfv;
-    recall_macro = sum(true_positives / (true_positives+false_negatives)) / nfv;
+    precision_macro = sum(true_positives / (true_positives+false_positives)) / n_classes;
+    recall_macro = sum(true_positives / (true_positives+false_negatives)) / n_classes;
 
     f1_micro = 2*(precision_micro*recall_micro) / (precision_micro+recall_micro);
     f1_macro = 2*(precision_macro*recall_macro) / (precision_macro+recall_macro);
