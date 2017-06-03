@@ -133,17 +133,18 @@ for krun=1:nruns;  % loop for validation runs
        end
    else
        lambda(krun,:,:) = omega'*omega;
-   end
-
-   % get final classification labels and score
-   [~,crout,~,score]    = compute_costs(fvecout,lblout,w,plbl,omega,mu,mode); 
-   % compute ROC
-   [tpr,fpr,~,thresh] = compute_roc(lblout>1,score);
-   % [thresh,tpr,fpr,auroc]=eval_roc(score,lblout>1,nthresh);
-   tprs(krun,:) =tpr; % true positive rates
-   fprs(krun,:) =fpr; % false positive rates
    
-      %f-measure
+   end
+    % get final classification labels and score
+    [~,crout,~,score]    = compute_costs(fvecout,lblout,w,plbl,omega,mu,mode); 
+
+    % compute ROC
+    [tpr,fpr,~,thresh] = compute_roc(lblout>1,score);
+    % [thresh,tpr,fpr,auroc]=eval_roc(score,lblout>1,nthresh);
+    tprs(krun,:) =tpr; % true positive rates
+    fprs(krun,:) =fpr; % false positive rates
+   
+   %f-measure
    [f_micro, f_macro] = compute_f_measure(fvecout,lblout,w,plbl,omega,mu,mode);
 
    display(['fmicro: ' num2str(f_micro)]);
@@ -250,30 +251,31 @@ end;
               
 if(showplots==1);   % display results
      
-
-  figure(1); 
-  onlyat= floor(linspace(1,totalsteps,10));  % set "time" points for output
-  onlyatval= onlyat(1:end-1)+1;
-     
-  figure(1)  
-  msize=15; % size of symbols
-  if (totalsteps< 50); msize=20; end;
-  
-  subplot(3,2,1);                 % total training and validation errors
-  % axis([0 totalsteps 0 1.2*max(mteval)]); 
-   plot(1:totalsteps,mtetra,':.',1:totalsteps,mteval,':.',...
-                                              'MarkerSize',msize); 
-   axis tight; axis 'auto y'; 
-   hold on; box on;
-   title('total error rates',...
-       'FontName','LucidaSans', 'FontWeight','bold'); 
-   legend('training','test','Location','Best'); 
-   xlabel('gradient steps');
-   errorbar(onlyat,mtetra(onlyat),stetra(onlyat)/sqrt(nruns),...
-           'co','MarkerSize',1); 
-   errorbar(onlyatval,mteval(onlyatval),steval(onlyatval)/sqrt(nruns),...
-           'go','MarkerSize',1);  
-   hold off;
+  if(mode~=4)
+        figure(1); 
+        onlyat= floor(linspace(1,totalsteps,10));  % set "time" points for output
+        onlyatval= onlyat(1:end-1)+1;
+            
+        figure(1)  
+        msize=15; % size of symbols
+        if (totalsteps< 50); msize=20; end;
+        
+        subplot(3,2,1);                 % total training and validation errors
+        % axis([0 totalsteps 0 1.2*max(mteval)]); 
+        plot(1:totalsteps,mtetra,':.',1:totalsteps,mteval,':.',...
+                                                    'MarkerSize',msize); 
+        axis tight; axis 'auto y'; 
+        hold on; box on;
+        title('total error rates',...
+            'FontName','LucidaSans', 'FontWeight','bold'); 
+        legend('training','test','Location','Best'); 
+        xlabel('gradient steps');
+        errorbar(onlyat,mtetra(onlyat),stetra(onlyat)/sqrt(nruns),...
+                'co','MarkerSize',1); 
+        errorbar(onlyatval,mteval(onlyatval),steval(onlyatval)/sqrt(nruns),...
+                'go','MarkerSize',1);  
+        hold off;
+   end
   
    
    subplot(3,2,2);                 % AUC(ROC) for training and validation 
