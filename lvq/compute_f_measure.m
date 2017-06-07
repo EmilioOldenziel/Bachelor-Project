@@ -52,10 +52,17 @@ function [f1_micro, f1_macro]=compute_f_measure(fvec,lbl,prot,plbl,omat,mu,mode)
     false_negatives = zeros(1,nfv);
 
     for iii=1:n_classes
+        %the vectors that are in class iii
         correct_fvecs = (lbl'==iii);
-        true_positives(iii) = sum((crout == iii)==correct_fvecs);
-        false_positives(iii) = sum((crout == iii)~=correct_fvecs);
-        false_negatives(iii) = sum((crout ~= iii)==correct_fvecs);
+
+        %what is classified as iii and is labled as iii
+        true_positives(iii) = sum(and((crout == iii),correct_fvecs));
+
+        %what is classified as iii but is not labeled as iii
+        false_positives(iii) = sum(and((crout == iii),not(correct_fvecs)));
+
+        %what is not classified as iii but should have been
+        false_negatives(iii) = sum(and((crout ~= iii),correct_fvecs));
     end
 
     precision_micro = sum(true_positives) / sum(true_positives+false_positives);
