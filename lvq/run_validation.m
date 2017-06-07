@@ -64,6 +64,9 @@ numtest  = nfv-numtrain;               % size of individual test sets
 % transpose lbl if necessary
 [lbl]=check_arguments(plbl,lbl,fvec,ncop,totalsteps); 
 
+f_micro_average = 0; 
+f_macro_average = 0;
+
 % initialize all observed quantities
 mcftra=zeros(totalsteps,1); mcfval=mcftra; 
 mtetra=mcftra; mteval=mcftra; mauctra=mcftra; maucval=mcftra;
@@ -150,6 +153,11 @@ for krun=1:nruns;  % loop for validation runs
    display(['fmicro: ' num2str(f_micro)]);
    display(['fmacro: ' num2str(f_macro)]);
 
+   f_micro_average = f_micro_average + f_micro/nruns; 
+   f_macro_average = f_micro_average + f_macro/nruns;
+
+   %end f-measure
+
    for ios = 1:length(lblout);  % loop through all classes
                                 % computation of actual confusion matrix
        confact(lblout(ios),crout(ios))=confact(lblout(ios),crout(ios))+1;
@@ -217,6 +225,9 @@ end;
    stetra= sqrt(stetra-mtetra.^2);   steval= sqrt(steval-mteval.^2); 
    sauctra=sqrt(sauctra-mauctra.^2); saucval=sqrt(saucval-maucval.^2);
    scwtra =sqrt(scwtra- mcwtra.^2);  scwval= sqrt(scwval - mcwval.^2);
+
+   disp(['average fmicro' num2str(f_micro_average)]);
+   disp(['average fmacro' num2str(f_macro_average)]);
 
  % define structures for output
    % mean learning curves
