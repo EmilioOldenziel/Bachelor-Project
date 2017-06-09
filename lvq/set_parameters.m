@@ -33,8 +33,8 @@ mu         = 0;
   
 % parameters of stepsize adaptation 
 if (mode<2 || mode==4); % full matrix updates with (0) or w/o (1) null space correction
-  etam   = 0.5; % suggestion: 2
-  etap   = 0.25; % suggestion: 1
+  etam   = 1; % suggestion: 2
+  etap   = 0.5; % suggestion: 1
   if (mode==0); 
       display('matrix relevances without null-space correction'); 
   end;
@@ -52,7 +52,7 @@ elseif (mode==3) % GLVQ, equivalent to Euclidean distance
     etam=0; 
     etap = 1; 
 end;   
-  decfac = 2.2;       % step size factor (decrease) for Papari steps
+  decfac = 1.8;       % step size factor (decrease) for Papari steps
   incfac = 1.05;       % step size factor (increase) for all steps
   ncop = 5;           % number of waypoints stored and averaged      
 

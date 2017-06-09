@@ -43,8 +43,9 @@ prot=proti;                            % prototypes before step
 
      chp = 0*prot;
      if(mode==4)
-        chms_f1 = zeros(ndim,ndim);
-        chms_f2 = zeros(ndim,ndim);
+        for iom=1:np
+            chms(:,:,iom) = zeros(ndim,ndim);
+        end
      else
        chm = 0*omat;       % initialize change of prot,omega
      end
@@ -94,8 +95,8 @@ prot=proti;                            % prototypes before step
       chp(jwin,:) = chp(jwin,:) - dwJ';  % correct   winner summed update
       chp(kwin,:) = chp(kwin,:) - dwK';  % incorrect winner summed update
       if(mode==4)
-          chms_f1 = chms_f1 - f1;
-          chms_f2 = chms_f2 - f2; 
+          chms(:,:,jwin) = chms(:,:,jwin) - f1;
+          chms(:,:,kwin) = chms(:,:,kwin) - f2; 
       else
 	      chm = chm - (f1 + f2);             % matrix summed update
       end
@@ -142,32 +143,30 @@ prot=proti;                            % prototypes before step
       omat = omat / sqrt( sum(sum(omat.^2)) );
     else
       % mode 4
-      if (mu>0)
-        chms_f1 = chms_f1 * mu*pinv(omat(:,:,jwin))';
-        chms_f2 = chms_f2 * mu*pinv(omat(:,:,kwin))';
-      end
+    %   if (mu>0)
+    %     chms_f1 = chms_f1 * mu*pinv(omat(:,:,jwin))';
+    %     chms_f2 = chms_f2 * mu*pinv(omat(:,:,kwin))';
+    %   end
 
       n2chw = 0;               % zero initial value of sum
       for ni=1:np;             % loop through (sum over) set of prototypes
           n2chw = n2chw + dot(chp(ni,:),chp(ni,:)); 
       end;
-      n2chm_f1 = sum(sum(chms_f1.^2));% total 'length' of matrix update
-      n2chm_f2 = sum(sum(chms_f2.^2));% total 'length' of matrix update
 
+      n2chm = zeros(1,np);
+      for iom=1:np
+        n2chm(iom)= sum(sum(chms(:,:,iom).^2));% total 'length' of matrix update
+      end
       prot = prot  + etap * chp/sqrt(n2chw);
 
       xvec=[fvec;prot]; % concat. protos and fvecs
 
       %update, correct and normalize winner matrix
-      omat(:,:,jwin) = omat(:,:,jwin) + etam * chms_f1/sqrt(n2chm_f1);
-      omat(:,:,jwin)= ((omat(:,:,jwin)*xvec')*pinv(xvec')); % corrected omega matrix
-      omat(:,:,jwin) = omat(:,:,jwin) / sqrt( sum(sum(omat(:,:,jwin).^2)));
-
-
-      %update, correct and normalize loser matrix
-      omat(:,:,kwin) = omat(:,:,kwin) + etam * chms_f2/sqrt(n2chm_f2);
-      omat(:,:,kwin)= ((omat(:,:,kwin)*xvec')*pinv(xvec')); % corrected omega matrix
-      omat(:,:,kwin) = omat(:,:,kwin) / sqrt( sum(sum(omat(:,:,kwin).^2)));
+      for iom=1:np
+        omat(:,:,iom) = omat(:,:,iom) + etam * chms(:,:,iom)/sqrt(n2chm(iom));
+        omat(:,:,iom)= ((omat(:,:,iom)*xvec')*pinv(xvec')); % corrected omega matrix
+        omat(:,:,iom) = omat(:,:,iom) / sqrt( sum(sum(omat(:,:,iom).^2)));
+      end
 
       %update, correct and normalize all loser matrices
       % for iom=1:length(incorrect)
