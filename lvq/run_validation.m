@@ -3,7 +3,7 @@
 % for training and validation
 
 function [gmlvq_mean, roc_validation, lcurves_mean,...
-          lcurves_sdt, param_set] = ...
+          lcurves_sdt, param_set,f1_mean] = ...
   run_validation(fvec,lbl,totalsteps,nruns,prctg,plbl, mode)
 
 % general algorithm settings and parameters of the Papari procedure
@@ -64,8 +64,8 @@ numtest  = nfv-numtrain;               % size of individual test sets
 % transpose lbl if necessary
 [lbl]=check_arguments(plbl,lbl,fvec,ncop,totalsteps); 
 
-f_micro_average = 0; 
-f_macro_average = 0;
+f_micro_average = []; 
+f_macro_average = [];
 
 % initialize all observed quantities
 mcftra=zeros(totalsteps,1); mcfval=mcftra; 
@@ -153,8 +153,8 @@ for krun=1:nruns;  % loop for validation runs
    display(['fmicro: ' num2str(f_micro)]);
    display(['fmacro: ' num2str(f_macro)]);
 
-   f_micro_average = f_micro_average + f_micro/nruns; 
-   f_macro_average = f_micro_average + f_macro/nruns;
+   f_micro_average = [f_micro_average  f_micro]; 
+   f_macro_average = [f_macro_average  f_macro];
 
    %end f-measure
 
@@ -226,8 +226,7 @@ end;
    sauctra=sqrt(sauctra-mauctra.^2); saucval=sqrt(saucval-maucval.^2);
    scwtra =sqrt(scwtra- mcwtra.^2);  scwval= sqrt(scwval - mcwval.^2);
 
-   disp(['average fmicro' num2str(f_micro_average)]);
-   disp(['average fmacro' num2str(f_macro_average)]);
+   f1_mean = mean(f_micro_average);
 
  % define structures for output
    % mean learning curves
@@ -360,7 +359,18 @@ if(showplots==1);   % display results
          'FontName','LucidaSans', 'FontWeight','bold'); 
    hold off;
 
-   figure(3);    % visualize the GMLVQ system 
+   figure(3)
+   plot(f_macro_average);
+   hold on;
+   plot(f_micro_average);
+    title('f-measures',...
+        'FontName','LucidaSans', 'FontWeight','bold'); 
+    xlabel('runs');
+    ylabel('output score'); 
+    legend('micro','macro','Location','Best');
+    hold off;
+
+   figure(4);    % visualize the GMLVQ system 
    display_gmlvq(protos_mean,lambda_mean,plbl,ndim, mode);  
    
 end; 
