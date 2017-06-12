@@ -28,10 +28,18 @@ if(mode==4);
     for i=1:rows;
         posiw=[posiw,(1:col-1)+(i-1)*(col)];
     end;
+
+    row_start = -4;  
+    for iw=1:nprots
+
+        row_start = row_start + 4;
+        if (iw==5)
+          figure(5);
+          row_start = 0;
+        end
       
-      for iw=1:nprots        
         % display prototypes as bar plots
-        subplot(rows,col,((iw-1)*4)+1); 
+        subplot(rows,col,row_start+1); 
           hold on;
           bar(prot(iw,:),'FaceColor',symbstrings(plbl(iw))); 
           title(['prot. ',num2str(iw), ', class ',num2str(plbl(iw))], ... 
@@ -43,7 +51,7 @@ if(mode==4);
       
       
         % display diagonal matrix elements as bar plot
-        subplot(rows,col,((iw-1)*4)+2); 
+        subplot(rows,col,row_start+2); 
           hold on;
           bar(sort(eig(lambda(:,:,iw)),'descend')); 
           title(strcat('eigenvalues of rel.mat. ','prot. ',num2str(iw)), ... 
@@ -53,7 +61,7 @@ if(mode==4);
           axis([0.3 ndim+0.7 0 (0.01+max(diag(lambda(:,:,iw))))]); 
           hold off;
         
-        subplot(rows,col,((iw-1)*4)+3); 
+        subplot(rows,col,row_start+3); 
           hold on;
           bar(diag(lambda(:,:,iw))); 
           title(strcat('rel. matrix, diag.','prot. ',num2str(iw)), ... 
@@ -65,7 +73,7 @@ if(mode==4);
           
           
         % display off-diagonal matrix elements as matrix
-        subplot(rows,col,((iw-1)*4)+4); 
+        subplot(rows,col,row_start+4); 
             lambdaoff = lambda(:,:,iw).*(1-eye(ndim));     % zero diagonal 
             imagesc(lambdaoff); colormap(summer); 
             axis square; 

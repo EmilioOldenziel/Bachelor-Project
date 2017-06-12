@@ -373,7 +373,7 @@ if(showplots==1);   % display results
     legend('micro','macro','Location','Best');
     hold off;
 
-   figure(4);    % visualize the GMLVQ system 
+    % visualize the GMLVQ system 
    display_gmlvq(protos_mean,lambda_mean,plbl,ndim, mode);  
    
 end; 
