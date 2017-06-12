@@ -23,8 +23,6 @@ for problem_nr = 0:4;
        class_data = spectra(newLabels == class_nr, :);
        class_mean = mean(class_data);
        class_variance= var(class_data);
-       length(class_mean)
-       length(class_variance)
        errorbar(wavelengths, class_mean, class_variance);
        xlabel('wavelength (nm)');
     end;
