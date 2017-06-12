@@ -43,9 +43,7 @@ prot=proti;                            % prototypes before step
 
      chp = 0*prot;
      if(mode==4)
-        for iom=1:np
-            chms(:,:,iom) = zeros(ndim,ndim);
-        end
+            chms(:,:,:,:,:) = zeros(ndim,ndim,nfv,iom);
      else
        chm = 0*omat;       % initialize change of prot,omega
      end
@@ -95,8 +93,8 @@ prot=proti;                            % prototypes before step
       chp(jwin,:) = chp(jwin,:) - dwJ';  % correct   winner summed update
       chp(kwin,:) = chp(kwin,:) - dwK';  % incorrect winner summed update
       if(mode==4)
-          chms(:,:,jwin) = chms(:,:,jwin) - f1;
-          chms(:,:,kwin) = chms(:,:,kwin) - f2; 
+          chms(:,:,i,jwin) = f1;
+          chms(:,:,i,kwin) = f2; 
       else
 	      chm = chm - (f1 + f2);             % matrix summed update
       end
@@ -150,12 +148,13 @@ prot=proti;                            % prototypes before step
 
       n2chw = 0;               % zero initial value of sum
       for ni=1:np;             % loop through (sum over) set of prototypes
-          n2chw = n2chw + dot(chp(ni,:),chp(ni,:)); 
+          n2chw = n2chw + dot(chp(ni,:),chp(ni,:));
+          chms_summed(:,:,ni) = -sum(chms(:,:,:,ni),3);
       end;
 
       n2chm = zeros(1,np);
       for iom=1:np
-        n2chm(iom)= sum(sum(chms(:,:,iom).^2));% total 'length' of matrix update
+        n2chm(iom)= sum(sum(chms_summed(:,:,iom).^2));% total 'length' of matrix update
       end
       prot = prot  + etap * chp/sqrt(n2chw);
 
@@ -163,7 +162,7 @@ prot=proti;                            % prototypes before step
 
       %update, correct and normalize winner matrix
       for iom=1:np
-        omat(:,:,iom) = omat(:,:,iom) + etam * chms(:,:,iom)/sqrt(n2chm(iom));
+        omat(:,:,iom) = omat(:,:,iom) + etam * chms_summed(:,:,iom)/sqrt(n2chm(iom));
         omat(:,:,iom)= ((omat(:,:,iom)*xvec')*pinv(xvec')); % corrected omega matrix
         omat(:,:,iom) = omat(:,:,iom) / sqrt( sum(sum(omat(:,:,iom).^2)));
       end
