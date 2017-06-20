@@ -41,13 +41,13 @@ end
 % omat=sqrtm(lambda);
 prot=proti;                            % prototypes before step
 
-     chp = 0*prot;
-     if(mode==4)
-            chms(:,:,:,:,:) = zeros(ndim,ndim,nfv,iom);
-     else
-       chm = 0*omat;       % initialize change of prot,omega
-     end
-     for i= 1:nfv;                     % loop through all training examples
+chp = 0*prot;
+if(mode==4)
+    chms(:,:,:,:) = zeros(ndim,ndim,iom);
+else
+    chm = 0*omat;       % initialize change of prot,omega
+end
+for i= 1:nfv;                     % loop through all training examples
        fvi = fvec(i,:); lbi = lbl(i);  % actual example
   
      % calculate squared distances to all prototypes
@@ -60,6 +60,7 @@ prot=proti;                            % prototypes before step
             end
          end;
    
+
     % find the two winning prototypes
       correct =   find (plbl == lbi);     % all correct prototype indices
       incorrect = find (plbl ~= lbi);     % all wrong   prototype indices
@@ -93,12 +94,12 @@ prot=proti;                            % prototypes before step
       chp(jwin,:) = chp(jwin,:) - dwJ';  % correct   winner summed update
       chp(kwin,:) = chp(kwin,:) - dwK';  % incorrect winner summed update
       if(mode==4)
-          chms(:,:,i,jwin) = f1;
-          chms(:,:,i,kwin) = f2; 
+          chms(:,:,jwin) = chms(:,:,jwin) - f1;
+          chms(:,:,kwin) = chms(:,:,kwin) - f2; 
       else
 	      chm = chm - (f1 + f2);             % matrix summed update
       end
-    end; % end of one loop through (sum over) all examples
+end; % end of one loop through (sum over) all examples
 
     if(mode~=4)
       % singularity control: add  derivative of penalty term times mu 
@@ -149,12 +150,11 @@ prot=proti;                            % prototypes before step
       n2chw = 0;               % zero initial value of sum
       for ni=1:np;             % loop through (sum over) set of prototypes
           n2chw = n2chw + dot(chp(ni,:),chp(ni,:));
-          chms_summed(:,:,ni) = -sum(chms(:,:,:,ni),3);
       end;
 
       n2chm = zeros(1,np);
       for iom=1:np
-        n2chm(iom)= sum(sum(chms_summed(:,:,iom).^2));% total 'length' of matrix update
+        n2chm(iom)= sum(sum(chms(:,:,iom).^2));% total 'length' of matrix update
       end
       prot = prot  + etap * chp/sqrt(n2chw);
 
@@ -162,23 +162,9 @@ prot=proti;                            % prototypes before step
 
       %update, correct and normalize winner matrix
       for iom=1:np
-        omat(:,:,iom) = omat(:,:,iom) + etam * chms_summed(:,:,iom)/sqrt(n2chm(iom));
+        omat(:,:,iom) = omat(:,:,iom) + etam * chms(:,:,iom)/sqrt(n2chm(iom));
         omat(:,:,iom)= ((omat(:,:,iom)*xvec')*pinv(xvec')); % corrected omega matrix
         omat(:,:,iom) = omat(:,:,iom) / sqrt( sum(sum(omat(:,:,iom).^2)));
       end
-
-      %update, correct and normalize all loser matrices
-      % for iom=1:length(incorrect)
-      %   omat(:,:,incorrect(iom)) = omat(:,:,incorrect(iom)) + etam * f2/sqrt(n2chm_f2);
-      %   omat(:,:,incorrect(iom))= ((omat(:,:,incorrect(iom))*xvec')*pinv(xvec')); % corrected omega matrix 
-      %   omat(:,:,incorrect(iom)) = omat(:,:,incorrect(iom)) / sqrt( sum(sum(omat(:,:,incorrect(iom)).^2)));
-      % end
-
-
     end
-    
-end  % one full, normalized gradient step performed, return omat and prot
-
-
-
-
+end  % one full, normalized gradient step performed, return omat(s) and prot
