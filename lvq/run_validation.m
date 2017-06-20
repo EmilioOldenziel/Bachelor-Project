@@ -362,7 +362,7 @@ if(showplots==1);   % display results
          'FontName','LucidaSans', 'FontWeight','bold'); 
    hold off;
 
-   figure(3)
+   figure(3);
    plot(f_macro_average);
    hold on;
    plot(f_micro_average);
@@ -373,6 +373,7 @@ if(showplots==1);   % display results
     legend('micro','macro','Location','Best');
     hold off;
 
+    figure(4);
     % visualize the GMLVQ system 
    display_gmlvq(protos_mean,lambda_mean,plbl,ndim, mode);  
    
